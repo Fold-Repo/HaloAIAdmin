@@ -1,0 +1,9 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+# Single-page app: all paths rewrite to index.html (fixes refresh 404)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
