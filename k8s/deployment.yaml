@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-creator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-creator-admin-config
+  namespace: ai-creator
+data:
+  VITE_API_BASE_URL: https://api.example.com/api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-creator-admin
+  namespace: ai-creator
+  labels:
+    app: ai-creator-admin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-creator-admin
+  template:
+    metadata:
+      labels:
+        app: ai-creator-admin
+    spec:
+      containers:
+        - name: web
+          image: ai-creator-admin:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-creator-admin
+  namespace: ai-creator
+spec:
+  selector:
+    app: ai-creator-admin
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-creator-admin
+  namespace: ai-creator
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: '10m'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: studio.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ai-creator-admin
+                port:
+                  number: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-creator-admin
+  namespace: ai-creator
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-creator-admin
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -1,0 +1,1 @@
+export { RenderingPage } from './RenderingPage';

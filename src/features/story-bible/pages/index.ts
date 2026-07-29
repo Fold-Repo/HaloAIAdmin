@@ -1,0 +1,1 @@
+export { StoryBiblePage } from './StoryBiblePage';
