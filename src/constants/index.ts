@@ -17,6 +17,7 @@ export const ROUTES = {
     PROJECTS: '/studio/projects',
     PROJECT_NEW: '/studio/projects/new',
     PROJECT_DETAIL: '/studio/projects/:projectId',
+    PROJECT_MANUAL_UPLOAD: '/studio/projects/:projectId/manual-upload',
     SERIES: '/studio/series',
     SERIES_DETAIL: '/studio/series/:seriesId',
     SEASONS: '/studio/series/:seriesId/seasons',

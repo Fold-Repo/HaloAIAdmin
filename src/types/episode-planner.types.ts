@@ -26,6 +26,7 @@ export type Episode = {
   sceneCount: number;
   assembledVideoUrl?: string;
   assembledAt?: string;
+  sourceType?: 'ai_assembled' | 'manual_upload';
   createdAt: string;
   updatedAt: string;
 };
@@ -100,6 +101,18 @@ export type AssembleEpisodeResult = {
   sceneCount: number;
   assembledVideoUrl: string;
   assembledAt: string;
+  storage?: 'cloudinary' | 'local';
+  message: string;
+};
+
+export type ManualEpisodeUploadResult = {
+  episodeId: string;
+  projectId: string;
+  assembledVideoUrl: string;
+  assembledAt: string;
+  status: string;
+  sourceType: 'manual_upload';
+  storage?: 'cloudinary' | 'local';
   message: string;
 };
 

@@ -1,5 +1,5 @@
-import { apiGet, apiPatch, apiPost } from '@/api';
-import { assembleRequestConfig } from '@/api/request-timeouts';
+import { apiClient, apiGet, apiPatch, apiPost } from '@/api';
+import { assembleRequestConfig, uploadRequestConfig } from '@/api/request-timeouts';
 import type {
   ApiResponse,
   AssembleEpisodeResult,
@@ -9,6 +9,7 @@ import type {
   EpisodeWithScenes,
   GenerateCliffhangerPayload,
   GenerateEpisodesPayload,
+  ManualEpisodeUploadResult,
   ReorderScenesPayload,
   Scene,
   SelectSceneVideoPayload,
@@ -78,4 +79,31 @@ export const episodePlannerService = {
       {},
       assembleRequestConfig,
     ),
+
+  uploadEpisodeVideo: (
+    projectId: string,
+    episodeId: string,
+    file: File,
+    onProgress?: (percent: number) => void,
+  ) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient
+      .post<ApiResponse<ManualEpisodeUploadResult>>(
+        `${BASE(projectId)}/${episodeId}/video`,
+        formData,
+        {
+          ...uploadRequestConfig,
+          headers: {
+            // Let the browser set multipart boundary (do not force application/json).
+            'Content-Type': false as unknown as string,
+          },
+          onUploadProgress: (event) => {
+            if (!onProgress || !event.total) return;
+            onProgress(Math.round((event.loaded / event.total) * 100));
+          },
+        },
+      )
+      .then((response) => response.data);
+  },
 };

@@ -20,6 +20,8 @@ export const appConfig = {
     videoTimeout: Number(requireEnv('VITE_API_VIDEO_TIMEOUT', '600000')),
     /** Episode assembly (download scenes + FFmpeg) */
     assembleTimeout: Number(requireEnv('VITE_API_ASSEMBLE_TIMEOUT', '600000')),
+    /** Manual MP4 upload can be large */
+    uploadTimeout: Number(requireEnv('VITE_API_UPLOAD_TIMEOUT', '600000')),
   },
   auth: {
     tokenKey: requireEnv('VITE_AUTH_TOKEN_KEY', 'ai_creator_auth_token'),

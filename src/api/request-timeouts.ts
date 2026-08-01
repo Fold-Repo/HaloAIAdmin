@@ -16,3 +16,8 @@ export const videoRequestConfig: AxiosRequestConfig = {
 export const assembleRequestConfig: AxiosRequestConfig = {
   timeout: appConfig.api.assembleTimeout,
 };
+
+/** Manual episode MP4 upload */
+export const uploadRequestConfig: AxiosRequestConfig = {
+  timeout: appConfig.api.uploadTimeout,
+};

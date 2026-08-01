@@ -26,6 +26,7 @@ export type {
   CreatorNotification,
   CreatorProject,
   NotificationType,
+  ProjectCreationMode,
   ProjectStatus,
   Season,
   SeasonStatus,
@@ -86,6 +87,7 @@ export type {
   SceneVideo,
   SelectSceneVideoPayload,
   AssembleEpisodeResult,
+  ManualEpisodeUploadResult,
   UpdateEpisodePayload,
   UpsertScenePayload,
 } from './episode-planner.types';

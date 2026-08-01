@@ -19,9 +19,7 @@ import {
 import { RoleRoute } from '@/features/authentication/routes/RoleRoute';
 import { AuthLayout, CreatorLayout, MainLayout } from '@/layouts';
 
-const HomePage = lazy(() =>
-  import('@/app/pages/HomePage').then((m) => ({ default: m.HomePage })),
-);
+const HomePage = lazy(() => import('@/app/pages/HomePage').then((m) => ({ default: m.HomePage })));
 
 const CreatorDashboardPage = lazy(() =>
   import('@/features/creator/pages/CreatorDashboardPage').then((m) => ({
@@ -44,6 +42,12 @@ const NewProjectPage = lazy(() =>
 const ProjectDetailPage = lazy(() =>
   import('@/features/creator/pages/ProjectDetailPage').then((m) => ({
     default: m.ProjectDetailPage,
+  })),
+);
+
+const ManualUploadPage = lazy(() =>
+  import('@/features/creator/pages/ManualUploadPage').then((m) => ({
+    default: m.ManualUploadPage,
   })),
 );
 
@@ -210,6 +214,10 @@ export const router = createBrowserRouter([
               {
                 path: ROUTES.STUDIO.PROJECT_DETAIL,
                 element: <ProjectDetailPage />,
+              },
+              {
+                path: ROUTES.STUDIO.PROJECT_MANUAL_UPLOAD,
+                element: <ManualUploadPage />,
               },
               {
                 path: ROUTES.STUDIO.STORY_COMPOSER,

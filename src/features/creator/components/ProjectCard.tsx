@@ -39,9 +39,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="line-clamp-1 text-base">{project.title}</CardTitle>
-          <Badge variant={getProjectStatusVariant(project.status)}>
-            {getProjectStatusLabel(project.status)}
-          </Badge>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <Badge variant={getProjectStatusVariant(project.status)}>
+              {getProjectStatusLabel(project.status)}
+            </Badge>
+            <Badge variant="outline">
+              {project.creationMode === 'manual_upload' ? 'Manual' : 'AI'}
+            </Badge>
+          </div>
         </div>
         <CardDescription className="line-clamp-2">{project.description}</CardDescription>
       </CardHeader>

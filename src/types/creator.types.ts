@@ -1,26 +1,18 @@
-export type ProjectStatus =
-  | 'draft'
-  | 'generating'
-  | 'ready'
-  | 'rendering'
-  | 'published'
-  | 'failed';
+export type ProjectStatus = 'draft' | 'generating' | 'ready' | 'rendering' | 'published' | 'failed';
 
 export type SeriesStatus = 'active' | 'archived';
 
 export type SeasonStatus = 'planning' | 'in-production' | 'complete';
 
-export type AiJobType =
-  | 'script'
-  | 'character'
-  | 'video'
-  | 'voice'
-  | 'subtitle'
-  | 'render';
+export type AiJobType = 'script' | 'character' | 'video' | 'voice' | 'subtitle' | 'render';
 
 export type AiJobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
+
+export type ProjectCreationMode = 'ai_generated' | 'manual_upload';
+
+export type EpisodeSourceType = 'ai_assembled' | 'manual_upload';
 
 export type CreatorProject = {
   id: string;
@@ -28,6 +20,7 @@ export type CreatorProject = {
   description: string;
   prompt: string;
   status: ProjectStatus;
+  creationMode?: ProjectCreationMode;
   seriesId?: string;
   seriesTitle?: string;
   seasonId?: string;
@@ -103,6 +96,7 @@ export type CreateProjectPayload = {
   targetFormat: 'vertical-short' | 'vertical-series' | 'horizontal';
   episodeLength: number;
   episodeCount: number;
+  creationMode?: ProjectCreationMode;
   seriesId?: string;
   seasonId?: string;
   createNewSeries?: boolean;

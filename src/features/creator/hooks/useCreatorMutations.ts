@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { QUERY_KEYS } from '@/constants';
 import { creatorService } from '@/features/creator/services/creator.service';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
-import type { ApiError, CreateProjectPayload, CreateSeasonPayload, CreateSeriesPayload } from '@/types';
+import type {
+  ApiError,
+  CreateProjectPayload,
+  CreateSeasonPayload,
+  CreateSeriesPayload,
+} from '@/types';
 
 import type { ProjectWizardValues } from '../schemas/creator.schemas';
 
@@ -14,14 +19,16 @@ export function useCreateProject() {
 
   return useMutation({
     mutationFn: (values: ProjectWizardValues) => {
+      const premise = values.premise.trim();
       const payload: CreateProjectPayload = {
         title: values.title,
-        description: values.premise.slice(0, 500),
-        prompt: values.premise,
+        description: (premise || values.title).slice(0, 500),
+        prompt: premise || values.title,
         genre: values.genre,
         targetFormat: values.targetFormat,
-        episodeLength: values.episodeLength,
-        episodeCount: values.episodeCount,
+        episodeLength: Number(values.episodeLength),
+        episodeCount: Number(values.episodeCount),
+        creationMode: values.creationMode,
         seriesId: values.assignmentMode === 'existing' ? values.seriesId : undefined,
         seasonId: values.assignmentMode === 'existing' ? values.seasonId : undefined,
         createNewSeries: values.assignmentMode === 'new-series',
@@ -34,6 +41,11 @@ export function useCreateProject() {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.projects });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.dashboard });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.series });
+
+      if (values.creationMode === 'manual_upload') {
+        return;
+      }
+
       navigate(getStoryComposerPath(response.data.id), {
         state: {
           autoCompose: true,
@@ -74,8 +86,7 @@ export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (notificationId: string) =>
-      creatorService.markNotificationRead(notificationId),
+    mutationFn: (notificationId: string) => creatorService.markNotificationRead(notificationId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.notifications });
     },

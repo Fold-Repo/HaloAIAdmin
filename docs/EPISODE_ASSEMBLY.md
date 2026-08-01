@@ -8,12 +8,12 @@ How scene videos are combined into a single episode MP4, where FFmpeg must be in
 
 ## Who needs FFmpeg?
 
-| Environment | FFmpeg required? | Why |
-|-------------|------------------|-----|
-| **Creator’s browser** | No | Assembly runs on the API server |
-| **Frontend (Vite / CDN)** | No | Static React app only |
-| **Backend API (local dev)** | **Yes** | `EpisodeAssemblyService` shells out to `ffmpeg` |
-| **Backend API (production)** | **Yes** | Same — install in the server VM or Docker image |
+| Environment                  | FFmpeg required? | Why                                             |
+| ---------------------------- | ---------------- | ----------------------------------------------- |
+| **Creator’s browser**        | No               | Assembly runs on the API server                 |
+| **Frontend (Vite / CDN)**    | No               | Static React app only                           |
+| **Backend API (local dev)**  | **Yes**          | `EpisodeAssemblyService` shells out to `ffmpeg` |
+| **Backend API (production)** | **Yes**          | Same — install in the server VM or Docker image |
 
 FFmpeg is a **server-side dependency** of the NestJS backend, like Postgres or Node. End users never install it.
 
@@ -25,20 +25,22 @@ FFmpeg is a **server-side dependency** of the NestJS backend, like Postgres or N
 2. Uses each scene’s **selected** video (`Scene.videoUrl`).
 3. **Downloads** each clip (from Grok temporary URLs or any HTTP(S) URL).
 4. Runs **FFmpeg concat** to produce one MP4.
-5. Saves the file on the API host and records metadata on the episode.
+5. Saves a local copy under `storage/assembled/`, then **uploads the episode-ready MP4 to Cloudinary** when configured (same path as manual episode upload).
+6. Stores the playback URL on `Episode.assembledVideoUrl` (Cloudinary `secure_url`, or legacy API path if Cloudinary is unset).
 
 ```text
 Scene 1 video ──┐
-Scene 2 video ──┼──► FFmpeg concat ──► backend/storage/assembled/{projectId}/{episodeId}.mp4
+Scene 2 video ──┼──► FFmpeg concat ──► local MP4 ──► Cloudinary (episode-ready)
 Scene 3 video ──┘
 ```
 
+**Scope:** Cloudinary stores **episode-ready** videos only (manual upload + AI-assembled). Per-scene Grok clips stay on provider URLs until assembly.
 **API**
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/creator/projects/:projectId/episodes/:episodeId/assemble` | Download scenes + concat |
-| `GET` | `/creator/projects/:projectId/episodes/:episodeId/assembled-video` | Stream assembled MP4 (auth required) |
+| Method | Path                                                               | Description                          |
+| ------ | ------------------------------------------------------------------ | ------------------------------------ |
+| `POST` | `/creator/projects/:projectId/episodes/:episodeId/assemble`        | Download scenes + concat             |
+| `GET`  | `/creator/projects/:projectId/episodes/:episodeId/assembled-video` | Stream assembled MP4 (auth required) |
 
 **UI**
 
@@ -135,22 +137,22 @@ FFMPEG_PATH=/usr/bin/ffmpeg
 
 ### Platform notes
 
-| Platform | Guidance |
-|----------|----------|
-| **Railway / Render / Fly.io** | Use Docker deploy with `backend/Dockerfile`, or add FFmpeg via buildpack/Nixpacks config |
-| **AWS ECS / EKS** | FFmpeg in container image + EFS/EBS for `storage/assembled` |
-| **Serverless (Lambda)** | Not supported as-is — assembly needs long-running FFmpeg + disk; use a worker VM or container |
-| **Vercel / Netlify (frontend only)** | No FFmpeg — only host the React app; API runs elsewhere |
+| Platform                             | Guidance                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| **Railway / Render / Fly.io**        | Use Docker deploy with `backend/Dockerfile`, or add FFmpeg via buildpack/Nixpacks config      |
+| **AWS ECS / EKS**                    | FFmpeg in container image + EFS/EBS for `storage/assembled`                                   |
+| **Serverless (Lambda)**              | Not supported as-is — assembly needs long-running FFmpeg + disk; use a worker VM or container |
+| **Vercel / Netlify (frontend only)** | No FFmpeg — only host the React app; API runs elsewhere                                       |
 
 ---
 
 ## Storage & backups
 
-| Asset | Location | Persist? |
-|-------|----------|----------|
-| Scene videos (Grok) | URL in DB only | Expires — download or assemble promptly |
-| Assembled episode | `backend/storage/assembled/{projectId}/{episodeId}.mp4` | Yes, on server disk |
-| Scene video history | `SceneVideo` table + URLs | URLs may expire |
+| Asset               | Location                                                | Persist?                                |
+| ------------------- | ------------------------------------------------------- | --------------------------------------- |
+| Scene videos (Grok) | URL in DB only                                          | Expires — download or assemble promptly |
+| Assembled episode   | `backend/storage/assembled/{projectId}/{episodeId}.mp4` | Yes, on server disk                     |
+| Scene video history | `SceneVideo` table + URLs                               | URLs may expire                         |
 
 **Production checklist**
 
@@ -165,26 +167,26 @@ Future improvement: upload assembled (and scene) files to **S3 / R2** and store 
 
 ## Environment variables
 
-| Variable | Required | Example | Notes |
-|----------|----------|---------|-------|
-| `FFMPEG_PATH` | No | `/opt/homebrew/bin/ffmpeg` | Override when `ffmpeg` is not on the process `PATH` |
+| Variable      | Required | Example                    | Notes                                               |
+| ------------- | -------- | -------------------------- | --------------------------------------------------- |
+| `FFMPEG_PATH` | No       | `/opt/homebrew/bin/ffmpeg` | Override when `ffmpeg` is not on the process `PATH` |
 
 Frontend timeout for assembly (client waits for the full download + concat):
 
-| Variable | Default | Notes |
-|----------|---------|-------|
+| Variable                    | Default           | Notes                        |
+| --------------------------- | ----------------- | ---------------------------- |
 | `VITE_API_ASSEMBLE_TIMEOUT` | `600000` (10 min) | Root `.env` / `.env.example` |
 
 ---
 
 ## Troubleshooting
 
-| Error | Fix |
-|-------|-----|
-| `FFmpeg is not installed or not on PATH` | Install FFmpeg on the **API server**; set `FFMPEG_PATH`; restart backend |
-| `Failed to download scene video (403/404)` | Grok URL expired — regenerate scene videos, then re-assemble |
-| `Assembled episode video file is missing on disk` | DB has metadata but file deleted — re-run **Assemble episode** |
-| Assembly works locally but not in prod | Prod image/VM missing FFmpeg or read-only filesystem without `storage/` write access |
+| Error                                             | Fix                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `FFmpeg is not installed or not on PATH`          | Install FFmpeg on the **API server**; set `FFMPEG_PATH`; restart backend             |
+| `Failed to download scene video (403/404)`        | Grok URL expired — regenerate scene videos, then re-assemble                         |
+| `Assembled episode video file is missing on disk` | DB has metadata but file deleted — re-run **Assemble episode**                       |
+| Assembly works locally but not in prod            | Prod image/VM missing FFmpeg or read-only filesystem without `storage/` write access |
 
 ---
 
@@ -199,6 +201,6 @@ Frontend timeout for assembly (client waits for the full download + concat):
 
 ## Changelog
 
-| Date | Notes |
-|------|-------|
+| Date       | Notes                                                                            |
+| ---------- | -------------------------------------------------------------------------------- |
 | 2026-07-28 | Initial guide: FFmpeg local vs production, Docker, storage, API, troubleshooting |

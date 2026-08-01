@@ -1,4 +1,5 @@
 export { CreatorDashboardPage } from './CreatorDashboardPage';
+export { ManualUploadPage } from './ManualUploadPage';
 export { NewProjectPage } from './NewProjectPage';
 export { NotificationsPage } from './NotificationsPage';
 export { ProjectDetailPage } from './ProjectDetailPage';

@@ -95,6 +95,11 @@ export function createApiClient(): AxiosInstance {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      // Axios + browser must set multipart boundary themselves.
+      config.headers.set?.('Content-Type', false as unknown as string);
+      delete (config.headers as Record<string, unknown>)['Content-Type'];
+    }
     return config;
   });
 
@@ -114,8 +119,7 @@ export function createApiClient(): AxiosInstance {
           return await handleTokenRefresh(client, originalRequest);
         } catch (refreshError) {
           const apiError: ApiError = {
-            message:
-              refreshError instanceof Error ? refreshError.message : 'Session expired',
+            message: refreshError instanceof Error ? refreshError.message : 'Session expired',
             status: 401,
           };
           return Promise.reject(apiError);
@@ -151,29 +155,17 @@ export async function apiGet<T>(url: string, config?: AxiosRequestConfig) {
   return response.data;
 }
 
-export async function apiPost<T, D = unknown>(
-  url: string,
-  data?: D,
-  config?: AxiosRequestConfig,
-) {
+export async function apiPost<T, D = unknown>(url: string, data?: D, config?: AxiosRequestConfig) {
   const response = await apiClient.post<T>(url, data, config);
   return response.data;
 }
 
-export async function apiPut<T, D = unknown>(
-  url: string,
-  data?: D,
-  config?: AxiosRequestConfig,
-) {
+export async function apiPut<T, D = unknown>(url: string, data?: D, config?: AxiosRequestConfig) {
   const response = await apiClient.put<T>(url, data, config);
   return response.data;
 }
 
-export async function apiPatch<T, D = unknown>(
-  url: string,
-  data?: D,
-  config?: AxiosRequestConfig,
-) {
+export async function apiPatch<T, D = unknown>(url: string, data?: D, config?: AxiosRequestConfig) {
   const response = await apiClient.patch<T>(url, data, config);
   return response.data;
 }

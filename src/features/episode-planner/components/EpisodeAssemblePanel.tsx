@@ -7,10 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { VideoPreviewModal } from '@/features/ai-generation/components/VideoPreviewModal';
 import { sceneHasVideos } from '@/features/ai-generation/utils/scene-video.utils';
-import {
-  useAssembleEpisode,
-  useEpisode,
-} from '@/features/episode-planner/hooks/useEpisodePlanner';
+import { useAssembleEpisode, useEpisode } from '@/features/episode-planner/hooks/useEpisodePlanner';
 import { getAssembledVideoApiUrl } from '@/features/episode-planner/utils/episode-planner.utils';
 import { downloadBlob } from '@/utils';
 import type { EpisodeWithScenes } from '@/types';
@@ -56,7 +53,7 @@ export function EpisodeAssemblePanel({
 
   useEffect(() => {
     return () => {
-      if (previewBlobUrl) {
+      if (previewBlobUrl && !/^https?:\/\//i.test(previewBlobUrl)) {
         URL.revokeObjectURL(previewBlobUrl);
       }
     };
@@ -66,6 +63,10 @@ export function EpisodeAssemblePanel({
     if (!episode?.assembledVideoUrl) return;
     setPreviewError(null);
     try {
+      if (/^https?:\/\//i.test(episode.assembledVideoUrl)) {
+        window.open(episode.assembledVideoUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
       let blobUrl = previewBlobUrl;
       if (!blobUrl) {
         blobUrl = await fetchAuthenticatedBlob(getAssembledVideoApiUrl(projectId, episodeId));
@@ -86,9 +87,17 @@ export function EpisodeAssemblePanel({
     if (!episode?.assembledVideoUrl) return;
     setPreviewError(null);
     try {
+      if (/^https?:\/\//i.test(episode.assembledVideoUrl)) {
+        setPreviewBlobUrl((current) => {
+          if (current && !/^https?:\/\//i.test(current)) URL.revokeObjectURL(current);
+          return episode.assembledVideoUrl!;
+        });
+        setPreviewOpen(true);
+        return;
+      }
       const blobUrl = await fetchAuthenticatedBlob(getAssembledVideoApiUrl(projectId, episodeId));
       setPreviewBlobUrl((current) => {
-        if (current) URL.revokeObjectURL(current);
+        if (current && !/^https?:\/\//i.test(current)) URL.revokeObjectURL(current);
         return blobUrl;
       });
       setPreviewOpen(true);
@@ -121,8 +130,8 @@ export function EpisodeAssemblePanel({
         <CardContent className="space-y-3">
           {!allScenesReady && (
             <p className="text-muted-foreground text-sm">
-              Generate and select a video for every scene above before assembling. Scene order follows
-              the timeline.
+              Generate and select a video for every scene above before assembling. Scene order
+              follows the timeline.
             </p>
           )}
 
@@ -130,7 +139,9 @@ export function EpisodeAssemblePanel({
             <div className="rounded-lg border p-3 text-sm">
               <p className="font-medium">Episode video ready</p>
               {assembledLabel && (
-                <p className="text-muted-foreground mt-1 text-xs">Last assembled {assembledLabel}</p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Last assembled {assembledLabel}
+                </p>
               )}
             </div>
           )}
@@ -141,11 +152,7 @@ export function EpisodeAssemblePanel({
               disabled={!allScenesReady || assembleEpisode.isPending}
               onClick={() => assembleEpisode.mutate()}
             >
-              {hasAssembly ? (
-                <RefreshCw className="size-4" />
-              ) : (
-                <Layers className="size-4" />
-              )}
+              {hasAssembly ? <RefreshCw className="size-4" /> : <Layers className="size-4" />}
               {assembleEpisode.isPending
                 ? 'Assembling…'
                 : hasAssembly

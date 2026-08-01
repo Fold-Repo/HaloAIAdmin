@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 export const projectWizardSchema = z
   .object({
+    creationMode: z.enum(['ai_generated', 'manual_upload']),
     title: z.string().min(2, 'Project title is required'),
-    premise: z.string().min(20, 'Describe your story premise in at least 20 characters'),
+    premise: z.string(),
     genre: z.string().min(2, 'Select a genre'),
     targetFormat: z.enum(['vertical-short', 'vertical-series', 'horizontal']),
     episodeLength: z.coerce.number().min(15).max(180),
@@ -15,6 +16,13 @@ export const projectWizardSchema = z
     newSeasonTitle: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.creationMode === 'ai_generated' && data.premise.trim().length < 20) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Describe your story premise in at least 20 characters',
+        path: ['premise'],
+      });
+    }
     if (data.assignmentMode === 'existing' && !data.seriesId) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
