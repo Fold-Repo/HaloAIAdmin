@@ -17,6 +17,7 @@ import { Progress } from '@/components/ui/progress';
 import { LoadingScreen } from '@/components/common';
 import { AiJobStatusPanel } from '@/features/creator/components/AiJobStatusPanel';
 import { CoverImageBanner } from '@/features/creator/components/CoverImageBanner';
+import { DeleteProjectDialog } from '@/features/creator/components/DeleteProjectDialog';
 import {
   getProjectStatusLabel,
   getProjectStatusVariant,
@@ -144,6 +145,19 @@ export function ProjectDetailPage() {
           </Button>
         </div>
       </div>
+
+      <Card className="border-destructive/40 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="text-destructive">Danger zone</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-muted-foreground text-sm">
+            Permanently delete this project and all episodes, videos, story data, and related
+            records. This cannot be recovered.
+          </p>
+          <DeleteProjectDialog projectId={projectId} projectTitle={project.title} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">

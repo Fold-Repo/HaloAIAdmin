@@ -28,9 +28,12 @@ export const creatorService = {
     apiGet<ApiResponse<CreatorProject>>(`${CREATOR_BASE}/projects/${projectId}`),
 
   createProject: (payload: CreateProjectPayload) =>
-    apiPost<ApiResponse<CreatorProject>, CreateProjectPayload>(
-      `${CREATOR_BASE}/projects`,
-      payload,
+    apiPost<ApiResponse<CreatorProject>, CreateProjectPayload>(`${CREATOR_BASE}/projects`, payload),
+
+  deleteProject: (projectId: string, confirmation: string) =>
+    apiDelete<ApiResponse<{ deleted: boolean; projectId: string; title: string; message: string }>>(
+      `${CREATOR_BASE}/projects/${projectId}`,
+      { data: { confirmation } },
     ),
 
   generateProjectCover: (projectId: string, payload?: { regenerate?: boolean }) =>

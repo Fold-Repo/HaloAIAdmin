@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import { QUERY_KEYS } from '@/constants';
+import { QUERY_KEYS, ROUTES } from '@/constants';
 import { creatorService } from '@/features/creator/services/creator.service';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
 import type {
@@ -126,6 +126,23 @@ export function useGenerateSeriesCover(seriesId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.seriesDetail(seriesId) });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.series });
+    },
+  });
+}
+
+export function useDeleteProject(projectId: string) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (confirmation: string) =>
+      creatorService.deleteProject(projectId, confirmation).then((r) => r.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.projects });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.dashboard });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.project(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.series });
+      navigate(ROUTES.STUDIO.PROJECTS);
     },
   });
 }
