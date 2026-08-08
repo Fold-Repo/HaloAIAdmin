@@ -11,6 +11,7 @@ import {
 } from '@/features/story-bible/components/SectionShell';
 import { useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
 import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
+import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
 import type { EpisodePlanEntry, StoryComposerMeta } from '@/types';
 
@@ -78,6 +79,9 @@ export function EpisodePlanSection({
               <Link to={getEpisodePlannerPath(projectId)}>Open episode planner</Link>
             </Button>
           )}
+          <Button asChild size="sm" variant="secondary">
+            <Link to={getStoryBiblePath(projectId, 'editor')}>Open story editor</Link>
+          </Button>
         </div>
       }
     >

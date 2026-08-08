@@ -20,6 +20,7 @@ import type {
   UpdateStoryDocumentPayload,
   UpdateStoryEndingPayload,
   UpdateStoryOverviewPayload,
+  ResyncStoryDocumentResult,
 } from '@/types';
 
 const BASE = (projectId: string) => `/creator/projects/${projectId}/story-bible`;
@@ -44,6 +45,9 @@ export const storyBibleService = {
       `${BASE(projectId)}/document`,
       payload,
     ),
+
+  resyncDocument: (projectId: string) =>
+    apiPost<ApiResponse<ResyncStoryDocumentResult>>(`${BASE(projectId)}/document/resync`),
 
   saveDocumentVersion: (projectId: string, payload: { label: string; changeSummary: string }) =>
     apiPost<ApiResponse<StoryBible['versions'][number]>>(`${BASE(projectId)}/versions`, payload),

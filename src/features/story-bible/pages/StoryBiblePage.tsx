@@ -116,7 +116,11 @@ export function StoryBiblePage() {
       {section === 'season-arc' && <SeasonArcSection seasonArc={bible.seasonArc} />}
       {section === 'ending' && <EndingSection projectId={projectId} ending={bible.ending} />}
       {section === 'editor' && (
-        <StoryEditorSection projectId={projectId} document={bible.document} />
+        <StoryEditorSection
+          projectId={projectId}
+          document={bible.document}
+          episodePlan={bible.episodePlan ?? []}
+        />
       )}
       {section === 'versions' && (
         <VersionHistorySection projectId={projectId} versions={bible.versions} />

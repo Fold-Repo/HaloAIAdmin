@@ -179,6 +179,18 @@ export function useSyncStorySummary(projectId: string) {
   });
 }
 
+export function useResyncStoryDocument(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => storyBibleService.resyncDocument(projectId).then((response) => response.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.status(projectId) });
+    },
+  });
+}
+
 export function useGenerateEpisodeBatch(projectId: string) {
   const queryClient = useQueryClient();
 

@@ -132,3 +132,11 @@ export type SyncStorySummaryResult = {
   overview: NonNullable<ComposerStatus['overview']>;
   composerStatus: ComposerStatus;
 };
+
+export type ResyncStoryDocumentResult = {
+  document: import('./story-bible.types').StoryDocument;
+  episodePlanCount: number;
+  documentEpisodeCount: number;
+  synced: boolean;
+  message: string;
+};
