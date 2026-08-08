@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { HowToUseButton } from '@/features/how-to-use';
 import { appConfig } from '@/config';
 import { ROUTES } from '@/constants';
 
@@ -11,7 +12,8 @@ export function AppHeader() {
         <Link to="/" className="text-lg font-semibold tracking-tight">
           {appConfig.name}
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-4">
+        <nav aria-label="Main" className="flex items-center gap-3 sm:gap-4">
+          <HowToUseButton variant="ghost" />
           <Link
             to={ROUTES.TUTORIAL}
             className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"

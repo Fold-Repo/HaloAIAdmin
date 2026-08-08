@@ -1,11 +1,5 @@
 export type AiAgentId =
-  | 'story-planner'
-  | 'script'
-  | 'character'
-  | 'video'
-  | 'voice'
-  | 'subtitle'
-  | 'music';
+  'story-planner' | 'script' | 'character' | 'video' | 'voice' | 'subtitle' | 'music';
 
 export type AiGenerationSection =
   | 'dashboard'
@@ -87,6 +81,8 @@ export type RunAgentPayload = {
   sceneId?: string;
   sceneIds?: string[];
   runAllScenes?: boolean;
+  /** Video agent: force new takes even when scenes already have video. */
+  regenerate?: boolean;
   modelId?: string;
 };
 
@@ -95,6 +91,7 @@ export type RunAgentBatchPayload = {
   sceneIds: string[];
   prompt?: string;
   episodeId?: string;
+  regenerate?: boolean;
   modelId?: string;
 };
 
@@ -145,17 +142,31 @@ export type PromptBuilderResult = {
 };
 
 export type RunAgentResult = {
-  agentId: AiAgentId;
-  jobId: string;
-  status: AiAgentStatus;
+  agentId: AiAgentId | string;
+  jobId?: string;
+  status: AiAgentStatus | string;
   message: string;
   sceneId?: string;
   sceneContextPreview?: string;
   sceneCount?: number;
+  skippedCount?: number;
   jobs?: RunAgentResult[];
   modelId?: string;
   provider?: string;
   outputPreview?: string;
   selectionReason?: string;
   videoUrl?: string;
+  async?: boolean;
+  skipped?: boolean;
+};
+
+/** Immediate response when Video Agent runs as a background AiJob (HTTP 202). */
+export type RunVideoAgentAccepted = {
+  async: true;
+  agentId: 'video';
+  jobId: string;
+  status: 'queued' | 'running' | string;
+  message: string;
+  sceneCount: number;
+  skippedCount: number;
 };

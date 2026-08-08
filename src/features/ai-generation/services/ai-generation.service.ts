@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from '@/api';
-import { aiRequestConfig, videoRequestConfig } from '@/api/request-timeouts';
+import { aiRequestConfig } from '@/api/request-timeouts';
 import type {
   AiAgent,
   AiDirectorOverview,
@@ -28,11 +28,16 @@ export const aiGenerationService = {
     apiPost<ApiResponse<RunAgentResult>, RunAgentPayload>(
       `${BASE(projectId)}/agents/run`,
       payload,
-      payload.agentId === 'video' ? videoRequestConfig : aiRequestConfig,
+      // Video now returns 202 immediately; long Grok work runs in the background.
+      aiRequestConfig,
     ),
 
   runPipeline: (projectId: string) =>
-    apiPost<ApiResponse<RunAgentResult[]>>(`${BASE(projectId)}/pipeline/run`, undefined, aiRequestConfig),
+    apiPost<ApiResponse<RunAgentResult[]>>(
+      `${BASE(projectId)}/pipeline/run`,
+      undefined,
+      aiRequestConfig,
+    ),
 
   getPromptTemplates: (projectId: string) =>
     apiGet<ApiResponse<PromptTemplate[]>>(`${BASE(projectId)}/prompts/templates`),
@@ -46,8 +51,7 @@ export const aiGenerationService = {
   getCostEstimate: (projectId: string) =>
     apiGet<ApiResponse<CostEstimate>>(`${BASE(projectId)}/cost`),
 
-  getLogs: (projectId: string) =>
-    apiGet<ApiResponse<AiLogEntry[]>>(`${BASE(projectId)}/logs`),
+  getLogs: (projectId: string) => apiGet<ApiResponse<AiLogEntry[]>>(`${BASE(projectId)}/logs`),
 
   getScenePreview: (projectId: string, episodeId?: string) => {
     const query = episodeId ? `?episodeId=${encodeURIComponent(episodeId)}` : '';
@@ -58,6 +62,6 @@ export const aiGenerationService = {
     apiPost<ApiResponse<RunAgentResult>, RunAgentBatchPayload>(
       `${BASE(projectId)}/agents/run-batch`,
       payload,
-      payload.agentId === 'video' ? videoRequestConfig : aiRequestConfig,
+      aiRequestConfig,
     ),
 };

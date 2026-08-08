@@ -14,6 +14,8 @@ export {
   usePromptTemplates,
   useRunAgent,
   useRunPipeline,
+  useVideoAgentRun,
+  useWatchVideoAgentJob,
 } from './hooks/useAiGeneration';
 
 export { AiGenerationPage } from './pages';

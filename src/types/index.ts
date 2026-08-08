@@ -111,6 +111,7 @@ export type {
   RunAgentBatchPayload,
   RunAgentPayload,
   RunAgentResult,
+  RunVideoAgentAccepted,
   ScenePreview,
   ScenePreviewEpisode,
   ScenePreviewItem,

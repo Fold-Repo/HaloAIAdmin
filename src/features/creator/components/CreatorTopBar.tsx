@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationBell } from '@/features/creator/components/NotificationBell';
 import { CreatorSidebar } from '@/features/creator/components/CreatorSidebar';
+import { HowToUseButton } from '@/features/how-to-use';
 import { ROUTES } from '@/constants';
 import { useAuth } from '@/features/authentication/hooks/useAuth';
 import { useAppStore } from '@/store';
@@ -34,6 +35,8 @@ export function CreatorTopBar() {
       </div>
 
       <div className="flex items-center gap-2">
+        <HowToUseButton className="hidden sm:inline-flex" />
+        <HowToUseButton size="icon" variant="ghost" className="sm:hidden" label="How to use" />
         <Button asChild size="sm" className="hidden sm:inline-flex">
           <Link to={ROUTES.STUDIO.PROJECT_NEW}>
             <Plus className="size-4" />
