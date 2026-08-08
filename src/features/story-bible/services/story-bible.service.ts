@@ -10,10 +10,12 @@ import type {
   ExtractEpisodesPreview,
   ExtractEpisodesResult,
   GenerateEpisodeBatchPayload,
-  GenerateEpisodeBatchResult,
+  GenerateEpisodeBatchAccepted,
   GenerateStoryVisualResult,
   StoryBible,
   StoryDocument,
+  SyncEpisodeCountPayload,
+  SyncEpisodeCountResult,
   SyncStorySummaryResult,
   UpdateStoryDocumentPayload,
   UpdateStoryEndingPayload,
@@ -23,8 +25,7 @@ import type {
 const BASE = (projectId: string) => `/creator/projects/${projectId}/story-bible`;
 
 export const storyBibleService = {
-  getStoryBible: (projectId: string) =>
-    apiGet<ApiResponse<StoryBible>>(BASE(projectId)),
+  getStoryBible: (projectId: string) => apiGet<ApiResponse<StoryBible>>(BASE(projectId)),
 
   updateOverview: (projectId: string, payload: UpdateStoryOverviewPayload) =>
     apiPatch<ApiResponse<StoryBible['overview']>, UpdateStoryOverviewPayload>(
@@ -45,10 +46,7 @@ export const storyBibleService = {
     ),
 
   saveDocumentVersion: (projectId: string, payload: { label: string; changeSummary: string }) =>
-    apiPost<ApiResponse<StoryBible['versions'][number]>>(
-      `${BASE(projectId)}/versions`,
-      payload,
-    ),
+    apiPost<ApiResponse<StoryBible['versions'][number]>>(`${BASE(projectId)}/versions`, payload),
 
   restoreVersion: (projectId: string, versionId: string) =>
     apiPost<ApiResponse<StoryDocument>>(`${BASE(projectId)}/versions/${versionId}/restore`),
@@ -59,7 +57,10 @@ export const storyBibleService = {
       payload ?? {},
     ),
 
-  extractEpisodes: (projectId: string, payload?: { content?: string; mode?: 'merge' | 'replace' }) =>
+  extractEpisodes: (
+    projectId: string,
+    payload?: { content?: string; mode?: 'merge' | 'replace' },
+  ) =>
     apiPost<ApiResponse<ExtractEpisodesResult>, { content?: string; mode?: 'merge' | 'replace' }>(
       `${BASE(projectId)}/extract-episodes`,
       payload ?? {},
@@ -90,11 +91,49 @@ export const storyBibleService = {
     ),
 
   generateEpisodeBatch: (projectId: string, payload?: GenerateEpisodeBatchPayload) =>
-    apiPost<ApiResponse<GenerateEpisodeBatchResult>, GenerateEpisodeBatchPayload>(
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, GenerateEpisodeBatchPayload>(
       `${BASE(projectId)}/composer/generate-episodes`,
       payload ?? {},
+    ),
+
+  syncEpisodeCount: (projectId: string, payload: SyncEpisodeCountPayload) =>
+    apiPost<ApiResponse<SyncEpisodeCountResult>, SyncEpisodeCountPayload>(
+      `${BASE(projectId)}/composer/sync-episode-count`,
+      payload,
       aiRequestConfig,
     ),
+
+  directorChat: (
+    projectId: string,
+    payload: {
+      message: string;
+      history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    },
+  ) =>
+    apiPost<
+      ApiResponse<{
+        reply: string;
+        appliedActions: string[];
+      }>,
+      typeof payload
+    >(`${BASE(projectId)}/composer/director-chat`, payload, aiRequestConfig),
+
+  scenePlanChat: (
+    projectId: string,
+    episodeId: string,
+    payload: {
+      message: string;
+      history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+      apply?: boolean;
+    },
+  ) =>
+    apiPost<
+      ApiResponse<{
+        reply: string;
+        scenesApplied: number;
+      }>,
+      typeof payload
+    >(`${BASE(projectId)}/episodes/${episodeId}/scene-plan-chat`, payload, aiRequestConfig),
 
   generateCharacterImage: (
     projectId: string,
@@ -103,6 +142,24 @@ export const storyBibleService = {
   ) =>
     apiPost<ApiResponse<GenerateStoryVisualResult>, { regenerate?: boolean }>(
       `${BASE(projectId)}/characters/${characterId}/generate-image`,
+      payload ?? {},
+      aiRequestConfig,
+    ),
+
+  generateLocationImage: (
+    projectId: string,
+    locationId: string,
+    payload?: { regenerate?: boolean },
+  ) =>
+    apiPost<ApiResponse<GenerateStoryVisualResult>, { regenerate?: boolean }>(
+      `${BASE(projectId)}/locations/${locationId}/generate-image`,
+      payload ?? {},
+      aiRequestConfig,
+    ),
+
+  generatePropImage: (projectId: string, propId: string, payload?: { regenerate?: boolean }) =>
+    apiPost<ApiResponse<GenerateStoryVisualResult>, { regenerate?: boolean }>(
+      `${BASE(projectId)}/props/${propId}/generate-image`,
       payload ?? {},
       aiRequestConfig,
     ),

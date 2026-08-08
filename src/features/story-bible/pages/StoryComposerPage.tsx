@@ -1,12 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
-import {
-  BookOpen,
-  Clapperboard,
-  Film,
-  RefreshCw,
-  Sparkles,
-  Video,
-} from 'lucide-react';
+import { BookOpen, Clapperboard, Film, RefreshCw, Sparkles, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +19,10 @@ import {
   useExpandEpisodes,
   useGenerateEpisodeBatch,
   useSyncStorySummary,
+  useWatchEpisodeGenerateJob,
 } from '@/features/story-bible/hooks/useStoryBible';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
-import type { ComposerNextStep } from '@/types';
+import type { ComposerNextStep, GenerateEpisodeBatchAccepted } from '@/types';
 
 const STEP_LABELS: Record<ComposerNextStep, string> = {
   compose: 'Plan full story',
@@ -69,13 +63,23 @@ export function StoryComposerPage() {
 
   const [premise, setPremise] = useState('');
   const [episodeCount, setEpisodeCount] = useState(3);
-  const [expandCount, setExpandCount] = useState(5);
+  const [firstBatchCount, setFirstBatchCount] = useState(1);
+  const [batchCount, setBatchCount] = useState(1);
+  const [expandCount, setExpandCount] = useState(1);
   const [expandDirection, setExpandDirection] = useState('');
   const [expandFinale, setExpandFinale] = useState(false);
   const [autoComposeAttempted, setAutoComposeAttempted] = useState(false);
+  const [activeGenerateJobId, setActiveGenerateJobId] = useState<string | null>(null);
 
   const project = projectQuery.data;
   const status = statusQuery.data;
+  const generateWatch = useWatchEpisodeGenerateJob(projectId, activeGenerateJobId);
+
+  useEffect(() => {
+    if (generateWatch.activeJobId && generateWatch.activeJobId !== activeGenerateJobId) {
+      setActiveGenerateJobId(generateWatch.activeJobId);
+    }
+  }, [generateWatch.activeJobId, activeGenerateJobId]);
 
   useEffect(() => {
     if (!project) return;
@@ -101,6 +105,7 @@ export function StoryComposerPage() {
       premise: premise.trim(),
       episodeCount,
       mode: 'replace',
+      firstBatchCount,
     });
   }, [
     navState.autoCompose,
@@ -108,6 +113,7 @@ export function StoryComposerPage() {
     status,
     premise,
     episodeCount,
+    firstBatchCount,
     composeStory,
   ]);
 
@@ -139,6 +145,7 @@ export function StoryComposerPage() {
       premise: premise.trim(),
       episodeCount,
       mode: status.episodeCount > 0 ? 'merge' : 'replace',
+      firstBatchCount,
     });
   };
 
@@ -150,9 +157,9 @@ export function StoryComposerPage() {
           <Badge variant="secondary">{project.title}</Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Claude plans the full season in the story bible first (beginning to ending). Episodes and
-          scenes are generated in batches of 5 from that plan. Each episode targets at least 1:40
-          ({targetRuntimeSec}s) with 7+ scenes before video generation.
+          Claude plans the full season in the story bible first (beginning to ending). Episode
+          scenes generate in settable batches (default 1 — safer behind Cloudflare). Each episode
+          targets at least 1:40 ({targetRuntimeSec}s) with 7+ scenes before video generation.
         </p>
       </div>
 
@@ -166,10 +173,7 @@ export function StoryComposerPage() {
               const active = index === currentStepIndex;
               const complete = index < currentStepIndex;
               return (
-                <Badge
-                  key={step}
-                  variant={active ? 'default' : complete ? 'secondary' : 'outline'}
-                >
+                <Badge key={step} variant={active ? 'default' : complete ? 'secondary' : 'outline'}>
                   {index + 1}. {STEP_LABELS[step]}
                 </Badge>
               );
@@ -219,7 +223,7 @@ export function StoryComposerPage() {
                 placeholder="Describe characters, conflict, tone, and where the story should go..."
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="episodeCount">Total episodes in season</Label>
                 <Input
@@ -231,7 +235,23 @@ export function StoryComposerPage() {
                   onChange={(event) => setEpisodeCount(Number(event.target.value))}
                 />
                 <p className="text-muted-foreground text-xs">
-                  Full plot is planned for all episodes. Scenes generate in batches of 5.
+                  Full plot is planned for all episodes up front.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstBatchCount">First batch size</Label>
+                <Input
+                  id="firstBatchCount"
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={firstBatchCount}
+                  onChange={(event) =>
+                    setFirstBatchCount(Math.min(5, Math.max(1, Number(event.target.value) || 1)))
+                  }
+                />
+                <p className="text-muted-foreground text-xs">
+                  Use 1 on staging to avoid timeouts / wasted Claude calls.
                 </p>
               </div>
               <div className="space-y-2">
@@ -318,8 +338,7 @@ export function StoryComposerPage() {
             </ul>
             {status.plannedEpisodeCount > status.episodePlanPreview.length && (
               <p className="text-muted-foreground text-xs">
-                +{status.plannedEpisodeCount - status.episodePlanPreview.length} more in story
-                bible
+                +{status.plannedEpisodeCount - status.episodePlanPreview.length} more in story bible
               </p>
             )}
           </CardContent>
@@ -333,28 +352,71 @@ export function StoryComposerPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              Generate episodes {status.nextBatch.start}–{status.nextBatch.end} from the story bible
-              plan
-              {status.nextBatch.isFinale ? ' (season finale batch)' : ''}. Each episode gets 7+
-              scenes totaling at least 1:40.
+              Next up from the plan: episode{status.nextBatch.size > 1 ? 's' : ''}{' '}
+              {status.nextBatch.start}
+              {status.nextBatch.size > 1 ? `–${status.nextBatch.end}` : ''}
+              {status.nextBatch.isFinale ? ' (season finale)' : ''}. Each episode gets 7+ scenes
+              totaling at least 1:40.
             </p>
+            <div className="max-w-xs space-y-2">
+              <Label htmlFor="batchCount">Episodes this call (1–5)</Label>
+              <Input
+                id="batchCount"
+                type="number"
+                min={1}
+                max={5}
+                value={batchCount}
+                onChange={(event) =>
+                  setBatchCount(Math.min(5, Math.max(1, Number(event.target.value) || 1)))
+                }
+              />
+              <p className="text-muted-foreground text-xs">
+                Prefer 1 behind Cloudflare (~100s limit). Larger batches risk a 524 after Claude
+                already ran.
+              </p>
+            </div>
+            {generateWatch.isWatching ? (
+              <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+                Episode job in progress
+                {generateWatch.job?.message ? `: ${generateWatch.job.message}` : ''}. Wait until it
+                finishes — another generate cannot be started.
+              </p>
+            ) : null}
             {generateBatch.error && (
               <p className="text-destructive text-sm" role="alert">
                 {generateBatch.error.message}
               </p>
             )}
+            {!generateWatch.isWatching &&
+            (generateBatch.data as GenerateEpisodeBatchAccepted | undefined)?.message ? (
+              <p className="text-muted-foreground text-xs">
+                {(generateBatch.data as GenerateEpisodeBatchAccepted).message}
+              </p>
+            ) : null}
             <Button
-              disabled={generateBatch.isPending}
-              onClick={() =>
-                generateBatch.mutate({
-                  count: status.nextBatch?.size,
-                  forceFinale: status.nextBatch?.isFinale,
-                })
-              }
+              disabled={generateBatch.isPending || generateWatch.isWatching}
+              onClick={() => {
+                if (generateWatch.isWatching) return;
+                generateBatch.mutate(
+                  {
+                    count: batchCount,
+                    forceFinale: status.nextBatch?.isFinale,
+                  },
+                  {
+                    onSuccess: (data) => {
+                      if ('jobId' in data && data.jobId) {
+                        setActiveGenerateJobId(data.jobId);
+                      }
+                    },
+                  },
+                );
+              }}
             >
               {generateBatch.isPending
-                ? 'Generating scenes...'
-                : `Generate episodes ${status.nextBatch.start}–${status.nextBatch.end}`}
+                ? 'Starting…'
+                : generateWatch.isWatching
+                  ? 'Job running — wait…'
+                  : `Generate ${batchCount} episode${batchCount === 1 ? '' : 's'}`}
             </Button>
           </CardContent>
         </Card>

@@ -3,8 +3,16 @@ import { Film } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { DeleteEpisodeDialog } from '@/features/episode-planner/components/DeleteEpisodeDialog';
 import {
   EPISODE_STATUS_LABELS,
   formatRuntime,
@@ -28,7 +36,16 @@ export function EpisodeCard({ episode, projectId }: EpisodeCardProps) {
             </CardTitle>
             <CardDescription className="line-clamp-2">{episode.synopsis}</CardDescription>
           </div>
-          <Badge variant="secondary">{EPISODE_STATUS_LABELS[episode.status]}</Badge>
+          <div className="flex items-start gap-1">
+            <Badge variant="secondary">{EPISODE_STATUS_LABELS[episode.status]}</Badge>
+            <DeleteEpisodeDialog
+              projectId={projectId}
+              episodeId={episode.id}
+              episodeNumber={episode.number}
+              episodeTitle={episode.title}
+              variant="icon"
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">

@@ -53,6 +53,8 @@ export type ComposeStoryPayload = {
   episodeLengthSec?: number;
   seriesContext?: string;
   mode?: 'replace' | 'merge';
+  /** Episodes to generate right after planning (1–5). Default 1. */
+  firstBatchCount?: number;
 };
 
 export type ComposeStoryResult = {
@@ -81,6 +83,14 @@ export type GenerateEpisodeBatchResult = {
   composerStatus: ComposerStatus;
 };
 
+/** Immediate response when generation runs as a background AiJob (HTTP 202). */
+export type GenerateEpisodeBatchAccepted = {
+  async: true;
+  jobId: string;
+  status: 'queued' | 'running' | string;
+  message: string;
+};
+
 export type ExpandEpisodesPayload = {
   count: number;
   direction?: string;
@@ -92,6 +102,30 @@ export type ExpandEpisodesResult = {
   batch: ComposerBatchInfo;
   episodes: Episode[];
   composerStatus: ComposerStatus;
+};
+
+export type SyncEpisodeCountPayload = {
+  targetCount: number;
+  direction?: string;
+  /** Episodes per AI call (1–5). Default 1. */
+  batchSize?: number;
+  /** Required to expand past the current season plan. */
+  confirmExpand?: boolean;
+};
+
+export type SyncEpisodeCountResult = {
+  targetCount: number;
+  availableEpisodes: number;
+  remaining: number;
+  complete: boolean;
+  alreadyComplete?: boolean;
+  needsExpandConsent?: boolean;
+  plannedEpisodeCount?: number;
+  message: string;
+  composerStatus?: ComposerStatus;
+  /** When true, Claude work runs in the background — poll Jobs / Notifications. */
+  async?: true;
+  jobId?: string;
 };
 
 export type SyncStorySummaryResult = {

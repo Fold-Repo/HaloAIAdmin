@@ -1,9 +1,10 @@
-import { apiClient, apiGet, apiPatch, apiPost } from '@/api';
+import { apiClient, apiDelete, apiGet, apiPatch, apiPost } from '@/api';
 import { assembleRequestConfig, uploadRequestConfig } from '@/api/request-timeouts';
 import type {
   ApiResponse,
   AssembleEpisodeResult,
   CliffhangerSuggestion,
+  DeleteEpisodeResult,
   Episode,
   EpisodePlannerSummary,
   EpisodeWithScenes,
@@ -39,6 +40,11 @@ export const episodePlannerService = {
       `${BASE(projectId)}/${episodeId}`,
       payload,
     ),
+
+  deleteEpisode: (projectId: string, episodeId: string, confirmation: string) =>
+    apiDelete<ApiResponse<DeleteEpisodeResult>>(`${BASE(projectId)}/${episodeId}`, {
+      data: { confirmation },
+    }),
 
   generateCliffhanger: (
     projectId: string,

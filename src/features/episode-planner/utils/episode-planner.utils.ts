@@ -22,16 +22,16 @@ export function calculateRuntimeDelta(estimated: number, target: number) {
   };
 }
 
-export function calculateSceneProgress(scenes: Array<{ status: string }>) {
-  if (scenes.length === 0) return 0;
-  const weights: Record<string, number> = {
-    draft: 0,
-    planned: 25,
-    generated: 70,
-    approved: 100,
-  };
-  const total = scenes.reduce((sum, scene) => sum + (weights[scene.status] ?? 0), 0);
-  return Math.round(total / scenes.length);
+export function calculateSceneProgress(
+  scenes: Array<{ videoUrl?: string | null }>,
+  assembledVideoUrl?: string | null,
+) {
+  const total = scenes.length;
+  const withVideo = scenes.filter((scene) => Boolean(scene.videoUrl?.trim())).length;
+  const assembled = Boolean(assembledVideoUrl?.trim());
+
+  if (total === 0) return assembled ? 100 : 0;
+  return Math.round(((withVideo + (assembled ? 1 : 0)) / (total + 1)) * 100);
 }
 
 export function getEpisodePlannerPath(projectId: string) {

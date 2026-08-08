@@ -116,6 +116,14 @@ export type ManualEpisodeUploadResult = {
   message: string;
 };
 
+export type DeleteEpisodeResult = {
+  deleted: boolean;
+  episodeId: string;
+  number: number;
+  title: string;
+  message: string;
+};
+
 export type CliffhangerSuggestion = {
   text: string;
   tone: string;

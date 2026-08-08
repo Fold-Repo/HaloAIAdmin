@@ -11,8 +11,10 @@ import { appConfig } from '@/config';
 import { ROUTES } from '@/constants';
 import { useProject } from '@/features/creator/hooks/useCreatorQueries';
 import { EpisodeEditor } from '@/features/episode-planner/components/EpisodeEditor';
+import { DeleteEpisodeDialog } from '@/features/episode-planner/components/DeleteEpisodeDialog';
 import { RuntimeEstimator } from '@/features/episode-planner/components/ProgressTracker';
 import { ScenePlanner } from '@/features/episode-planner/components/ScenePlanner';
+import { ScenePlanChatPanel } from '@/features/episode-planner/components/ScenePlanChatPanel';
 import { SceneTimeline } from '@/features/episode-planner/components/SceneTimeline';
 import { SceneAiPreviewPanel } from '@/features/ai-generation/components/SceneAiPreviewPanel';
 import { EpisodeAssemblePanel } from '@/features/episode-planner/components/EpisodeAssemblePanel';
@@ -88,7 +90,7 @@ export function EpisodeDetailPage() {
     );
   }
 
-  const sceneProgress = calculateSceneProgress(episode.scenes);
+  const sceneProgress = calculateSceneProgress(episode.scenes, episode.assembledVideoUrl);
 
   return (
     <div className="space-y-6">
@@ -109,6 +111,13 @@ export function EpisodeDetailPage() {
           <Button asChild variant="outline">
             <Link to={getEpisodePlannerPath(projectId)}>All episodes</Link>
           </Button>
+          <DeleteEpisodeDialog
+            projectId={projectId}
+            episodeId={episode.id}
+            episodeNumber={episode.number}
+            episodeTitle={episode.title}
+            navigateAway
+          />
         </div>
       </div>
 
@@ -137,11 +146,11 @@ export function EpisodeDetailPage() {
         <div className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Scene progress</CardTitle>
+              <CardTitle className="text-base">Episode progress</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Scenes planned for generation</span>
+                <span className="text-muted-foreground">Scene videos + assembly</span>
                 <span>{sceneProgress}%</span>
               </div>
               <Progress value={sceneProgress} />
@@ -159,6 +168,8 @@ export function EpisodeDetailPage() {
       {!isManual && (
         <>
           <SceneAiPreviewPanel projectId={projectId} agentId="video" episodeId={episodeId} />
+
+          <ScenePlanChatPanel projectId={projectId} episodeId={episodeId} />
 
           <SceneTimeline
             projectId={projectId}

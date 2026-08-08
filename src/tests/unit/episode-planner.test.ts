@@ -20,19 +20,26 @@ describe('episode planner utils', () => {
     expect(result.label).toContain('over target');
   });
 
-  it('calculates scene progress', () => {
+  it('calculates scene progress from video coverage and assembly', () => {
     expect(
-      calculateSceneProgress([
-        { status: 'draft' },
-        { status: 'approved' },
-      ]),
-    ).toBe(50);
+      calculateSceneProgress([{ videoUrl: null }, { videoUrl: 'https://cdn.example/a.mp4' }]),
+    ).toBe(33);
+    expect(
+      calculateSceneProgress(
+        [{ videoUrl: 'https://cdn.example/a.mp4' }, { videoUrl: 'https://cdn.example/b.mp4' }],
+        null,
+      ),
+    ).toBe(67);
+    expect(
+      calculateSceneProgress(
+        [{ videoUrl: 'https://cdn.example/a.mp4' }, { videoUrl: 'https://cdn.example/b.mp4' }],
+        'https://cdn.example/episode.mp4',
+      ),
+    ).toBe(100);
   });
 
   it('builds episode detail paths', () => {
-    expect(getEpisodeDetailPath('proj-1', 'ep-1')).toBe(
-      '/studio/projects/proj-1/episodes/ep-1',
-    );
+    expect(getEpisodeDetailPath('proj-1', 'ep-1')).toBe('/studio/projects/proj-1/episodes/ep-1');
   });
 });
 

@@ -103,13 +103,13 @@ export function StoryBiblePage() {
       {section === 'characters' && (
         <CharactersSection projectId={projectId} characters={bible.characters} />
       )}
-      {section === 'relationships' && (
-        <RelationshipsSection relationships={bible.relationships} />
-      )}
+      {section === 'relationships' && <RelationshipsSection relationships={bible.relationships} />}
       {section === 'timeline' && <TimelineSection timeline={bible.timeline} />}
       {section === 'lore' && <LoreSection lore={bible.lore} />}
-      {section === 'locations' && <LocationsSection locations={bible.locations} />}
-      {section === 'props' && <PropsSection props={bible.props} />}
+      {section === 'locations' && (
+        <LocationsSection projectId={projectId} locations={bible.locations} />
+      )}
+      {section === 'props' && <PropsSection projectId={projectId} props={bible.props} />}
       {section === 'wardrobe' && (
         <WardrobeSection projectId={projectId} wardrobe={bible.wardrobe} />
       )}

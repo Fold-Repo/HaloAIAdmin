@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, Sparkles } from 'lucide-react';
+import { CheckCircle2, Circle, ListPlus, Sparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import {
   EntityCard,
   SectionShell,
 } from '@/features/story-bible/components/SectionShell';
+import { useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
+import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
 import type { EpisodePlanEntry, StoryComposerMeta } from '@/types';
 
@@ -31,6 +33,7 @@ export function EpisodePlanSection({
   episodePlan,
   composerMeta,
 }: EpisodePlanSectionProps) {
+  const syncMutation = useSyncEpisodeCount(projectId);
   const sorted = [...episodePlan].sort((a, b) => a.number - b.number);
   const generatedCount = sorted.filter((entry) => entry.generated).length;
   const totalCount = sorted.length;
@@ -42,14 +45,40 @@ export function EpisodePlanSection({
       title="Episode Plan"
       description="The full season story from first episode to finale. Read this before generating scenes or video."
       action={
-        pendingCount > 0 ? (
-          <Button asChild size="sm" variant="outline">
-            <Link to={getStoryComposerPath(projectId)}>
-              <Sparkles className="size-4" />
-              Generate next batch
-            </Link>
-          </Button>
-        ) : undefined
+        <div className="flex flex-wrap gap-2">
+          {totalCount > 0 && pendingCount > 0 ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={syncMutation.isPending}
+              onClick={() =>
+                void (async () => {
+                  const result = await syncMutation.mutateAsync({
+                    targetCount: totalCount,
+                    batchSize: 1,
+                    direction: `Generate missing episodes up to ${totalCount} from the story bible.`,
+                  });
+                  if (result.async) return;
+                })()
+              }
+            >
+              <ListPlus className="size-4" />
+              {syncMutation.isPending ? 'Syncing…' : `Fill ${pendingCount} missing available`}
+            </Button>
+          ) : null}
+          {pendingCount > 0 ? (
+            <Button asChild size="sm" variant="outline">
+              <Link to={getStoryComposerPath(projectId)}>
+                <Sparkles className="size-4" />
+                Generate next batch
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm" variant="outline">
+              <Link to={getEpisodePlannerPath(projectId)}>Open episode planner</Link>
+            </Button>
+          )}
+        </div>
       }
     >
       {sorted.length === 0 ? (
@@ -93,10 +122,7 @@ function EpisodePlanCard({ episode }: { episode: EpisodePlanEntry }) {
   const actLabel = ACT_PHASE_LABELS[episode.actPhase] ?? episode.actPhase;
 
   return (
-    <EntityCard
-      title={`Episode ${episode.number}: ${episode.title}`}
-      subtitle={actLabel}
-    >
+    <EntityCard title={`Episode ${episode.number}: ${episode.title}`} subtitle={actLabel}>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge variant="secondary" className="capitalize">
           {actLabel}

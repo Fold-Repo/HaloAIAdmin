@@ -71,6 +71,9 @@ export type {
   ExpandEpisodesResult,
   GenerateEpisodeBatchPayload,
   GenerateEpisodeBatchResult,
+  GenerateEpisodeBatchAccepted,
+  SyncEpisodeCountPayload,
+  SyncEpisodeCountResult,
   SyncStorySummaryResult,
 } from './story-composer.types';
 export type {
@@ -88,6 +91,7 @@ export type {
   SelectSceneVideoPayload,
   AssembleEpisodeResult,
   ManualEpisodeUploadResult,
+  DeleteEpisodeResult,
   UpdateEpisodePayload,
   UpsertScenePayload,
 } from './episode-planner.types';

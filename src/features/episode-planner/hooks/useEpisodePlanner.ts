@@ -49,8 +49,12 @@ export function useGenerateEpisodes(projectId: string) {
     mutationFn: (payload: GenerateEpisodesPayload) =>
       episodePlannerService.generateEpisodes(projectId, payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.summary(projectId),
+      });
     },
   });
 }
@@ -65,7 +69,9 @@ export function useUpdateEpisode(projectId: string, episodeId: string) {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.episodePlanner.episode(projectId, episodeId),
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
+      });
     },
   });
 }
@@ -97,7 +103,9 @@ export function useCreateScene(projectId: string, episodeId: string) {
           };
         },
       );
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.summary(projectId),
+      });
     },
   });
 }
@@ -165,6 +173,33 @@ export function useAssembleEpisode(projectId: string, episodeId: string) {
       });
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
+      });
+    },
+  });
+}
+
+export function useDeleteEpisode(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ episodeId, confirmation }: { episodeId: string; confirmation: string }) =>
+      episodePlannerService
+        .deleteEpisode(projectId, episodeId, confirmation)
+        .then((response) => response.data),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.summary(projectId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.episode(projectId, variables.episodeId),
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.project(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.storyComposer.status(projectId),
       });
     },
   });

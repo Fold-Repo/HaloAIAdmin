@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/common';
 import { EpisodeGenerator } from '@/features/episode-planner/components/EpisodeGenerator';
 import { EpisodeList } from '@/features/episode-planner/components/EpisodeList';
+import { EpisodePlanTools } from '@/features/episode-planner/components/EpisodePlanTools';
 import { ProgressTracker } from '@/features/episode-planner/components/ProgressTracker';
 import {
   useEpisodePlannerSummary,
@@ -59,6 +60,7 @@ export function EpisodesPage() {
       </div>
 
       <ProgressTracker summary={summary} />
+      <EpisodePlanTools projectId={projectId} />
       <EpisodeGenerator projectId={projectId} />
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Episodes</h2>
