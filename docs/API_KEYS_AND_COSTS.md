@@ -100,47 +100,59 @@ Video input (when used): ~$0.01/sec · Image input: ~$0.002/image (per third-par
 
 ---
 
-## Video generation pricing comparison
+## Video generation pricing comparison (as of Aug 2026)
 
-Assumptions for this product: **vertical short drama**, **720p**, **~60 s per episode**, **3 scenes** (~20 s each if generated separately).
+Assumptions for HaloReels / Creator Studio: **vertical short drama**, **720p**, **~60 s per episode**, scenes generated as **8 s** Veo clips or **~15 s** Grok clips then assembled.
 
-### Per-second rates (official API tiers, July 2026)
+### Google Flow vs Gemini API pricing
 
-| Provider | Model / tier                          | 720p (with audio where noted) | 8 s clip  | 60 s episode |
-| -------- | ------------------------------------- | ----------------------------- | --------- | ------------ |
-| **xAI**  | Grok Imagine `grok-imagine-video`     | **$0.05/s**                   | **$0.40** | **$3.00**    |
-| **xAI**  | Grok Imagine `grok-imagine-video-1.5` | **$0.08/s**                   | **$0.64** | **$4.80**    |
-| Google   | Veo 3.1 **Lite** (with audio)         | $0.05/s                       | $0.40     | $3.00        |
-| Google   | Veo 3.1 **Fast** (with audio)         | $0.10/s                       | $0.80     | $6.00        |
-| Google   | Veo 3.1 **Standard** (with audio)     | $0.40/s                       | $3.20     | **$24.00**   |
-| Google   | Veo 3.1 Standard **4K**               | $0.60/s                       | $4.80     | $36.00       |
+| Route                              | How you pay                                  | Notes                                       |
+| ---------------------------------- | -------------------------------------------- | ------------------------------------------- |
+| **Google Flow** (consumer UI)      | Subscription credits (AI Plus / Pro / Ultra) | Creative UI; **not** what the backend calls |
+| **Gemini API Veo** (what we wired) | **Per second** of output video               | Same Veo 3.1 models Flow uses               |
 
-Sources: [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing), [xAI pricing](https://docs.x.ai/developers/pricing). Third-party blogs may cite 720p Grok at $0.07/s — **always confirm on the official model page before budgeting.**
+Gemini API Veo 3.1 (with audio) — verify on [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing#veo-3.1):
 
-### Side-by-side (60 s episode, video only)
+| Tier                | ~USD / sec (720p) | 8 s clip | 60 s episode (8×8 s) |
+| ------------------- | ----------------- | -------- | -------------------- |
+| Veo 3.1 Fast        | **$0.10**         | $0.80    | **$6.00**            |
+| Veo 3.1 Standard    | **$0.40**         | $3.20    | **$24.00**           |
+| Veo 3.1 Standard 4K | **$0.60**         | $4.80    | $36.00               |
+
+_(Lite rows appear on some rate cards at ~$0.05/s; Fast is the supported API budget lane in this codebase.)_
+
+### Market comparison — character consistency / quality / price
+
+| Model                    | Character consistency                    | Video quality                 | ~USD/s (720p+audio) | Best use                        |
+| ------------------------ | ---------------------------------------- | ----------------------------- | ------------------- | ------------------------------- |
+| **Veo 3.1 Fast** (wired) | **Excellent** with portrait `asset` refs | High cinematic + native audio | $0.10               | **Default for published drama** |
+| **Veo 3.1 Standard**     | **Best-in-class** refs + polish          | Highest Veo fidelity / 4K     | $0.40               | Hero / final export             |
+| **Runway Gen-4.5**       | **Best editing-side face lock**          | Excellent creative control    | ~$0.25–0.50 equiv.  | Multi-shot style systems        |
+| **Kling 3.0**            | Good face lock                           | Strong motion realism         | ~$0.08–0.17         | Volume cinematic                |
+| **Grok Imagine**         | Weak without refs (ours was text-only)   | Good social / draft           | **$0.05–0.08**      | Cheap iteration                 |
+| **Sora 2**               | Strong physics / multi-subject           | Top-tier complex scenes       | Subscription-heavy  | Special set pieces              |
+
+### Side-by-side cost (60 s episode, video only)
 
 ```
-Grok Imagine (standard)     $3.00   ████
-Veo 3.1 Lite                $3.00   ████
-Grok Imagine 1.5            $4.80   ██████
-Veo 3.1 Fast                $6.00   ████████
-Veo 3.1 Standard (current) $24.00   ████████████████████████████████
+Grok Imagine (standard)      $3.00   ████
+Grok Imagine 1.5             $4.80   ██████
+Veo 3.1 Fast (recommended)   $6.00   ████████
+Kling 3.0 (approx)         ~$6–10   █████████
+Runway Gen-4.5 (approx)   ~$15–30   ████████████████
+Veo 3.1 Standard            $24.00   ████████████████████████████████
 ```
 
-**Takeaway:** For budget vertical shorts, **Grok Imagine standard ($0.05/s) matches Veo Lite** and is **~8× cheaper than Veo Standard**, which is what the UI currently labels as “Veo”. Grok 1.5 adds quality at $0.08/s — still ~5× cheaper than Veo Standard.
+### Verdict for HaloReels (today)
 
-### Feature trade-offs
+| Priority                    | Winner                                              | Why                                                                                            |
+| --------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Character consistency**   | **Veo 3.1 (+ story-bible portraits as asset refs)** | Native reference images + locked `visualNotes`; Runway still leads pure “edit suite” workflows |
+| **Video quality**           | **Veo 3.1 Standard** (hero) / **Fast** (default)    | Cinematic + native dialogue/SFX in one pass                                                    |
+| **Pricing / volume drafts** | **Grok Imagine $0.05/s**                            | ~2× cheaper than Veo Fast; use for previews only                                               |
+| **Best overall stack**      | **Hybrid**                                          | Grok or Veo Fast for drafts → **Veo Fast/Standard + refs** for publish                         |
 
-|                    | Grok Imagine                                         | Veo 3.1                          |
-| ------------------ | ---------------------------------------------------- | -------------------------------- |
-| API                | Yes — REST, async video jobs                         | Yes — Gemini API                 |
-| Audio in clip      | Check current model docs                             | Included (Lite/Fast/Standard)    |
-| Max duration       | Up to ~15 s per request (typical); stitch for longer | Configurable; 8 s common default |
-| Vertical 9:16      | Supported                                            | Supported (since Veo 3 update)   |
-| Reference-to-video | `grok-imagine-video` only (not 1.5)                  | Image-to-video supported         |
-| Best for           | Cost-sensitive vertical drama at scale               | Highest polish + native audio    |
-
-For **60 s episodes**, both stacks usually require **multiple segments** (e.g. 4× 15 s or 8× 8 s), so multiply segment count × per-second rate.
+**Studio default when `GOOGLE_GEMINI_API_KEY` is set:** `veo-3.1-fast` (priority 1), falling back to Grok when Google is unavailable or rate-limited.
 
 ---
 
@@ -164,13 +176,12 @@ Reference rates: OpenAI [$5/$30 per 1M tokens](https://developers.openai.com/api
 
 ### Total per episode (including video)
 
-| Video provider                  | Video (60 s) | Non-video | **Total / episode** |
-| ------------------------------- | ------------ | --------- | ------------------- |
-| **Grok Imagine** (standard)     | $3.00        | $1.13     | **~$4.13**          |
-| **Grok Imagine 1.5**            | $4.80        | $1.13     | **~$5.93**          |
-| Veo 3.1 Lite                    | $3.00        | $1.13     | **~$4.13**          |
-| Veo 3.1 Fast                    | $6.00        | $1.13     | **~$7.13**          |
-| **Veo 3.1 Standard (selected)** | $24.00       | $1.13     | **~$25.13**         |
+| Video provider              | Video (60 s) | Non-video | **Total / episode** |
+| --------------------------- | ------------ | --------- | ------------------- |
+| **Grok Imagine** (standard) | $3.00        | $1.13     | **~$4.13**          |
+| **Grok Imagine 1.5**        | $4.80        | $1.13     | **~$5.93**          |
+| **Veo 3.1 Fast (default)**  | $6.00        | $1.13     | **~$7.13**          |
+| **Veo 3.1 Standard (hero)** | $24.00       | $1.13     | **~$25.13**         |
 
 ### Project-level projections
 
@@ -179,29 +190,34 @@ Default seed project **Midnight Alley**: 3 episodes × 60 s.
 | Scenario               | Episodes | Video model  | Est. total  |
 | ---------------------- | -------- | ------------ | ----------- |
 | Seed series (3 ep)     | 3        | Grok Imagine | **~$12**    |
+| Seed series (3 ep)     | 3        | Veo Fast     | **~$21**    |
 | Seed series (3 ep)     | 3        | Veo Standard | **~$75**    |
-| Active creator / month | 10       | Grok Imagine | **~$41**    |
+| Active creator / month | 10       | Veo Fast     | **~$71**    |
 | Active creator / month | 10       | Veo Standard | **~$251**   |
-| Studio scale / month   | 100      | Grok Imagine | **~$413**   |
+| Studio scale / month   | 100      | Veo Fast     | **~$713**   |
 | Studio scale / month   | 100      | Veo Standard | **~$2,513** |
 
 Add **~15–25% buffer** for retries, failed renders, and prompt iteration.
 
 ### Switching video model in the app
 
-1. Set `XAI_API_KEY` in `backend/.env`
-2. Open **Studio → AI Settings** and enable **Grok Imagine Video**
-3. Run the **Video** agent from a scene (Episode detail or AI Generation → Video)
+1. Set `GOOGLE_GEMINI_API_KEY` and/or `XAI_API_KEY` in `backend/.env`
+2. Generate **story-bible character portraits** (needed for Veo face lock)
+3. Open **Studio → AI Settings** and enable:
+   - **Veo 3.1 Fast (Flow)** — recommended publish default
+   - **Veo 3.1 Standard (Flow)** — hero shots
+   - **Grok Imagine Video** — cheap drafts
+4. Run the **Video** agent from a scene
 
-Grok Imagine is wired live: submit → poll → save `videoUrl` on the scene. URLs are temporary — download promptly or **assemble episode** to persist a combined MP4 on the server (see [EPISODE_ASSEMBLY.md](./EPISODE_ASSEMBLY.md)).
+**Veo path:** Gemini `predictLongRunning` → poll → download MP4 → persist at `/api/media/scene-videos/{uuid}.mp4`, attach up to **3** story-bible portraits as `asset` reference images, inject locked `visualNotes` into the prompt.
 
-For Veo, keep `GOOGLE_GEMINI_API_KEY` and enable Veo Lite in AI Settings (API integration pending).
+**Grok path:** submit → poll → temporary URL (assemble episode to persist — see [EPISODE_ASSEMBLY.md](./EPISODE_ASSEMBLY.md)).
 
 ---
 
 ## Cost controls (recommended)
 
-1. **Cap video tier** — Default to Grok Imagine or Veo Lite for drafts; Veo Standard only on final export.
+1. **Cap video tier** — Default to Veo Fast (+ refs) for publish; Grok for drafts; Veo Standard only on hero export.
 2. **Segment length** — Generate 8–15 s clips per scene; avoid single 60 s requests where unsupported.
 3. **Cache story bible context** — Use provider prompt caching (OpenAI ~90% input discount, Anthropic cache reads ~10% of input).
 4. **Batch API** — OpenAI Batch API (~50% off) for non-interactive script/planning jobs.

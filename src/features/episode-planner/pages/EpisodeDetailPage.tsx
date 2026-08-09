@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { StreamableVideo } from '@/components/common/StreamableVideo';
 import { LoadingScreen } from '@/components/common';
 import { fetchAuthenticatedBlob } from '@/api/client';
 import { appConfig } from '@/config';
@@ -128,14 +129,13 @@ export function EpisodeDetailPage() {
           </CardHeader>
           <CardContent>
             {previewUrl ? (
-              <video
+              <StreamableVideo
                 src={previewUrl}
-                controls
                 className="max-h-[420px] w-full rounded-lg bg-black"
               />
             ) : (
               <p className="text-muted-foreground text-sm">
-                No video uploaded yet. Use Upload video to add an MP4.
+                No video uploaded yet. Use Upload video to add an MP4 (stored as HLS for streaming).
               </p>
             )}
           </CardContent>

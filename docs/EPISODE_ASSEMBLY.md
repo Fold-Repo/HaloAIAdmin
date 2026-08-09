@@ -17,6 +17,48 @@ How scene videos are combined into a single episode MP4, where FFmpeg must be in
 
 FFmpeg is a **server-side dependency** of the NestJS backend, like Postgres or Node. End users never install it.
 
+### Streaming format (HLS by default on R2)
+
+After **manual upload** and **scene assembly**, the API packages video for **chunked streaming**:
+
+```bash
+ffmpeg -i input.mp4 \
+  -c:v libx264 -c:a aac \
+  -hls_time 4 \
+  -hls_playlist_type vod \
+  -hls_segment_filename "seg_%03d.ts" \
+  index.m3u8
+```
+
+Uploaded to R2 as:
+
+```text
+{R2_KEY_PREFIX}/{projectId}/{episodeId}/index.m3u8
+{R2_KEY_PREFIX}/{projectId}/{episodeId}/seg_000.ts
+…
+```
+
+`Episode.assembledVideoUrl` points at the **playlist** (`.m3u8`). Mobile `videoUrl` / `videoFormat: "hls"` should use ExoPlayer / AVPlayer HLS.
+
+Env:
+
+```env
+EPISODE_VIDEO_STORAGE=r2
+EPISODE_VIDEO_FORMAT=hls   # or mp4 for legacy progressive files
+```
+
+**Re-process existing R2 MP4s → HLS:**
+
+```bash
+cd backend
+node scripts/optimize-r2-episode-videos.mjs --dry-run
+node scripts/optimize-r2-episode-videos.mjs
+# optional: --project <id> --limit 3
+# legacy MP4 faststart only: --mp4
+```
+
+Requires `ffmpeg`, `DATABASE_URL`, and `R2_*` env vars.
+
 ---
 
 ## What assembly does
