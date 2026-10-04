@@ -66,7 +66,9 @@ export function useUpdatePublishSettings(projectId: string) {
     onSuccess: (response) => {
       queryClient.setQueryData(QUERY_KEYS.publishing.settings(projectId), response.data);
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.publishing.overview(projectId) });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.publishing.pushPreview(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.publishing.pushPreview(projectId),
+      });
     },
   });
 }
@@ -88,10 +90,17 @@ export function usePublishProject(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: PublishProjectPayload = {}) => publishingService.publish(projectId, payload),
+    mutationFn: (payload: PublishProjectPayload = {}) =>
+      publishingService.publish(projectId, payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.publishing.overview(projectId) });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.publishing.settings(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.project(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.projects });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.dashboard });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
+      });
     },
   });
 }
