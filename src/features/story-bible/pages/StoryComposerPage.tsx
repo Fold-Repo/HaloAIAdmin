@@ -307,8 +307,11 @@ export function StoryComposerPage() {
       {paused ? (
         <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm">
           <p>
-            The story plan is running in the background. This page stays paused and checks the job
-            every few seconds. The plan loads here when that job finishes.
+            The story plan is running in the background, eight episodes at a time. This page stays
+            paused and checks the job every few seconds.
+            {runningJob?.message
+              ? ` ${runningJob.message}`
+              : ' The plan loads here when that job finishes.'}
           </p>
           <Button
             type="button"
