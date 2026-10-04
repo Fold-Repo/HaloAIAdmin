@@ -66,6 +66,7 @@ export type {
   ComposeStoryResult,
   ComposerBatchInfo,
   ComposerNextStep,
+  EpisodeBatch,
   ComposerStatus,
   ExpandEpisodesPayload,
   ExpandEpisodesResult,

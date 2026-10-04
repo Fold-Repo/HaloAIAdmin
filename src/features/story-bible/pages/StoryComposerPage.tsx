@@ -22,6 +22,7 @@ import {
   useComposerStatus,
   useExpandEpisodes,
   useGenerateEpisodeBatch,
+  useRememberSeasonSize,
   useStoryBoard,
   useSyncStorySummary,
 } from '@/features/story-bible/hooks/useStoryBible';
@@ -91,11 +92,13 @@ export function StoryComposerPage() {
   const storiesQuery = useStoryBoard(projectId);
   const composeStory = useComposeStory(projectId);
   const generateBatch = useGenerateEpisodeBatch(projectId);
+  const rememberSeasonSize = useRememberSeasonSize(projectId);
   const expandEpisodes = useExpandEpisodes(projectId);
   const syncSummary = useSyncStorySummary(projectId);
 
   const [premise, setPremise] = useState('');
   const [episodeCount, setEpisodeCount] = useState(3);
+  const [seasonSize, setSeasonSize] = useState(3);
   const [expandCount, setExpandCount] = useState(1);
   const [expandDirection, setExpandDirection] = useState('');
   const [expandFinale, setExpandFinale] = useState(false);
@@ -136,6 +139,11 @@ export function StoryComposerPage() {
     setPremise(navState.premise ?? project.prompt ?? '');
     setEpisodeCount(navState.episodeCount ?? 3);
   }, [project, navState.premise, navState.episodeCount]);
+
+  useEffect(() => {
+    if (!status?.plannedEpisodeCount) return;
+    setSeasonSize(status.plannedEpisodeCount);
+  }, [status?.plannedEpisodeCount]);
 
   useEffect(() => {
     if (
@@ -384,6 +392,64 @@ export function StoryComposerPage() {
         </Card>
       )}
 
+      {status.hasStoryOverview && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Episode batches</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <p className="text-muted-foreground">
+              Each batch is two episodes. Finished batches keep their scenes. Raise the season size
+              if later episodes disappeared, then generate the next batch.
+            </p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="seasonSize">Season episodes</Label>
+                <Input
+                  id="seasonSize"
+                  type="number"
+                  min={1}
+                  max={50}
+                  className="w-28"
+                  value={seasonSize}
+                  disabled={paused}
+                  onChange={(event) =>
+                    setSeasonSize(Math.min(50, Math.max(1, Number(event.target.value) || 1)))
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={paused || rememberSeasonSize.isPending}
+                onClick={() => rememberSeasonSize.mutate(seasonSize)}
+              >
+                {rememberSeasonSize.isPending ? 'Saving…' : 'Remember season size'}
+              </Button>
+            </div>
+            {(status.episodeBatches?.length ?? 0) > 0 && (
+              <ul className="space-y-1">
+                {status.episodeBatches?.map((batch) => (
+                  <li key={batch.start} className="flex items-center gap-2">
+                    <Badge variant={batch.status === 'scenes-ready' ? 'secondary' : 'outline'}>
+                      Ep {batch.start}
+                      {batch.end !== batch.start ? `–${batch.end}` : ''}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">
+                      {batch.status === 'scenes-ready'
+                        ? 'scenes ready'
+                        : batch.status === 'outline-ready'
+                          ? 'outline ready'
+                          : 'not written yet'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {status.hasEpisodePlan && status.episodePlanPreview.length > 0 && (
         <Card>
           <CardHeader>
@@ -427,13 +493,11 @@ export function StoryComposerPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              {status.pendingEpisodeCount} planned episode
-              {status.pendingEpisodeCount === 1 ? '' : 's'} still need scenes. Next up: episode
+              {status.pendingEpisodeCount} of {status.plannedEpisodeCount} episodes still need
+              stories. Next batch: episode
               {status.nextBatch.size > 1 ? 's' : ''} {status.nextBatch.start}
-              {status.nextBatch.size > 1 ? `–${status.nextBatch.end}` : ''}
-              {status.nextBatch.isFinale ? ' (season finale)' : ''}. Each episode gets 7+ scenes
-              totaling at least 1:40. Generation runs in the background until every planned episode
-              has scenes.
+              {status.nextBatch.size > 1 ? `–${status.nextBatch.end}` : ''}. This writes the outline
+              if it is missing, then the scenes for that batch only.
             </p>
             {generateBatch.error && (
               <p className="text-destructive text-sm" role="alert">
@@ -450,8 +514,10 @@ export function StoryComposerPage() {
               disabled={generateBatch.isPending || paused}
               onClick={() => {
                 if (paused) return;
+                const nextBatch = status.nextBatch;
+                if (!nextBatch) return;
                 generateBatch.mutate(
-                  { generateAll: true },
+                  { count: nextBatch.size },
                   {
                     onSuccess: (data) => {
                       if ('jobId' in data && data.jobId) {
@@ -467,7 +533,7 @@ export function StoryComposerPage() {
                 ? 'Starting…'
                 : paused
                   ? 'Paused until you refresh'
-                  : `Generate all ${status.pendingEpisodeCount} remaining episode${status.pendingEpisodeCount === 1 ? '' : 's'}`}
+                  : `Generate episodes ${status.nextBatch.start}–${status.nextBatch.end}`}
             </Button>
           </CardContent>
         </Card>

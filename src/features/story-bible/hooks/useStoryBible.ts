@@ -137,6 +137,20 @@ export function useStoryBoard(projectId: string, options?: { poll?: boolean }) {
   });
 }
 
+export function useRememberSeasonSize(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (totalEpisodes: number) =>
+      storyBibleService
+        .rememberSeasonSize(projectId, totalEpisodes)
+        .then((response) => response.data),
+    onSuccess: (status) => {
+      queryClient.setQueryData(QUERY_KEYS.storyComposer.status(projectId), status);
+    },
+  });
+}
+
 export function useComposeStory(projectId: string) {
   const queryClient = useQueryClient();
 

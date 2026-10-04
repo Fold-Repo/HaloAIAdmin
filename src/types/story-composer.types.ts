@@ -23,6 +23,14 @@ export type ComposerBatchInfo = {
   isFinale: boolean;
 };
 
+export type EpisodeBatchStatus = 'scenes-ready' | 'outline-ready' | 'not-planned';
+
+export type EpisodeBatch = {
+  start: number;
+  end: number;
+  status: EpisodeBatchStatus;
+};
+
 export type ComposerStatus = {
   projectId: string;
   hasStoryOverview: boolean;
@@ -39,6 +47,7 @@ export type ComposerStatus = {
   summarySyncedAt?: string;
   nextStep: ComposerNextStep;
   nextBatch: ComposerBatchInfo | null;
+  episodeBatches?: EpisodeBatch[];
   episodePlanPreview: EpisodePlanPreview[];
   overview: {
     logline: string;
