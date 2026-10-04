@@ -217,9 +217,9 @@ export function StoryComposerPage() {
           <Badge variant="secondary">{project.title}</Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Plan the full season, then the server writes every episode and its scenes in the
-          background. This page stays paused until you refresh. A notification appears when it
-          finishes. Each episode targets at least 1:40 ({targetRuntimeSec}s) with 7+ scenes.
+          Plan the full season, then the server writes scenes two episodes at a time. Each batch
+          sends a notification when those scenes are saved. This page stays paused until you
+          refresh. Each episode targets at least 1:40 ({targetRuntimeSec}s) with 7+ scenes.
         </p>
       </div>
 
@@ -267,8 +267,9 @@ export function StoryComposerPage() {
       {paused ? (
         <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm">
           <p>
-            Story generation is running on the server. This page stays paused and does not check for
-            updates. A notification will appear when it finishes.
+            Story generation is running on the server, two episodes at a time. This page stays
+            paused. A notification is sent after each batch, including that batch’s scenes. Press
+            Refresh stories to load the episodes that are already done.
           </p>
           <Button
             type="button"
