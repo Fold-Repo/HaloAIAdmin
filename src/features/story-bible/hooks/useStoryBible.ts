@@ -119,11 +119,21 @@ export function useRestoreStoryVersion(projectId: string) {
 
 export type StoryBibleMutationError = ApiError;
 
-export function useComposerStatus(projectId: string) {
+export function useComposerStatus(projectId: string, options?: { poll?: boolean }) {
   return useQuery({
     queryKey: QUERY_KEYS.storyComposer.status(projectId),
     queryFn: () => storyBibleService.getComposerStatus(projectId).then((response) => response.data),
     enabled: !!projectId,
+    refetchInterval: options?.poll ? 4000 : false,
+  });
+}
+
+export function useStoryBoard(projectId: string, options?: { poll?: boolean }) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storyComposer.stories(projectId),
+    queryFn: () => storyBibleService.getStoryBoard(projectId).then((response) => response.data),
+    enabled: !!projectId,
+    refetchInterval: options?.poll ? 4000 : false,
   });
 }
 
@@ -133,16 +143,10 @@ export function useComposeStory(projectId: string) {
   return useMutation({
     mutationFn: (payload: ComposeStoryPayload) =>
       storyBibleService.composeStory(projectId, payload).then((response) => response.data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.status(projectId) });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.episodePlanner.summary(projectId),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
-      });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.project(projectId) });
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.jobs });
+      if ('async' in data && data.async) return;
+      invalidateStoryProduction(queryClient, projectId);
     },
   });
 }
@@ -224,6 +228,7 @@ export function useWatchEpisodeGenerateJob(projectId: string, jobId: string | nu
           (item.status === 'queued' || item.status === 'running') &&
           (item.agentId === 'story-composer-generate' ||
             item.agentId === 'story-composer-sync' ||
+            item.agentId === 'story-composer-compose' ||
             (jobId != null && item.id === jobId)),
       );
       return hasActive ? 2500 : false;
@@ -235,7 +240,9 @@ export function useWatchEpisodeGenerateJob(projectId: string, jobId: string | nu
       (item) =>
         item.projectId === projectId &&
         (item.status === 'queued' || item.status === 'running') &&
-        (item.agentId === 'story-composer-generate' || item.agentId === 'story-composer-sync'),
+        (item.agentId === 'story-composer-generate' ||
+          item.agentId === 'story-composer-sync' ||
+          item.agentId === 'story-composer-compose'),
     ) ?? (jobId ? jobsQuery.data?.find((item) => item.id === jobId) : undefined);
 
   const job = jobId ? (jobsQuery.data?.find((item) => item.id === jobId) ?? activeJob) : activeJob;
@@ -269,6 +276,7 @@ function invalidateStoryProduction(
   projectId: string,
 ) {
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.status(projectId) });
+  void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.stories(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });

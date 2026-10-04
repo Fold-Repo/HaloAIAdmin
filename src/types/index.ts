@@ -76,6 +76,9 @@ export type {
   SyncEpisodeCountResult,
   SyncStorySummaryResult,
   ResyncStoryDocumentResult,
+  StoryBoard,
+  StoryBoardEpisode,
+  StoryBoardScene,
 } from './story-composer.types';
 export type {
   CliffhangerSuggestion,

@@ -81,6 +81,7 @@ export const QUERY_KEYS = {
   },
   storyComposer: {
     status: (projectId: string) => ['story-composer', projectId, 'status'] as const,
+    stories: (projectId: string) => ['story-composer', projectId, 'stories'] as const,
   },
   episodePlanner: {
     summary: (projectId: string) => ['episode-planner', projectId, 'summary'] as const,

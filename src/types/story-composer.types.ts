@@ -53,8 +53,31 @@ export type ComposeStoryPayload = {
   episodeLengthSec?: number;
   seriesContext?: string;
   mode?: 'replace' | 'merge';
-  /** Episodes to generate right after planning (1–5). Default 1. */
+  /** Episodes to generate right after planning (1–5). Ignored — compose writes every episode in the background. */
   firstBatchCount?: number;
+};
+
+export type StoryBoardScene = {
+  id: string;
+  order: number;
+  title: string;
+  description: string;
+  location?: string;
+  durationSec: number;
+  characters: string[];
+};
+
+export type StoryBoardEpisode = {
+  id: string;
+  number: number;
+  title: string;
+  synopsis: string;
+  cliffhanger: string;
+  scenes: StoryBoardScene[];
+};
+
+export type StoryBoard = {
+  episodes: StoryBoardEpisode[];
 };
 
 export type ComposeStoryResult = {
@@ -73,6 +96,8 @@ export type ComposeStoryResult = {
 export type GenerateEpisodeBatchPayload = {
   count?: number;
   forceFinale?: boolean;
+  /** Write scenes for every planned episode that does not have them yet. */
+  generateAll?: boolean;
 };
 
 export type GenerateEpisodeBatchResult = {
