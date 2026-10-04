@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { BookOpen, Clapperboard, Film, RefreshCw, Sparkles, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -84,9 +84,12 @@ export function StoryComposerPage() {
     queryKey: [...QUERY_KEYS.creator.jobs, 'composer-snapshot', projectId],
     queryFn: () => creatorService.getAiJobs().then((response) => response.data),
     enabled: !!projectId,
-    refetchInterval: false,
+    refetchInterval: (query) => {
+      if (waitingJobId) return 4000;
+      const jobs = query.state.data ?? [];
+      return jobs.some((job) => isActiveComposerJob(job, projectId)) ? 4000 : false;
+    },
     refetchOnWindowFocus: false,
-    staleTime: Number.POSITIVE_INFINITY,
   });
 
   const projectQuery = useProject(projectId);
@@ -107,6 +110,8 @@ export function StoryComposerPage() {
   const [expandFinale, setExpandFinale] = useState(false);
   const [autoComposeAttempted, setAutoComposeAttempted] = useState(false);
   const [selectedEpisodes, setSelectedEpisodes] = useState<number[]>([]);
+  const settledJobIds = useRef(new Set<string>());
+  const watchedJobId = useRef<string | null>(null);
 
   const project = projectQuery.data;
   const status = statusQuery.data;
@@ -137,6 +142,28 @@ export function StoryComposerPage() {
       setRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    const jobs = jobsQuery.data ?? [];
+    const active = jobs.find((job) => isActiveComposerJob(job, projectId));
+    if (active) watchedJobId.current = active.id;
+    const targetId = waitingJobId ?? watchedJobId.current;
+    if (!targetId) return;
+    const job = jobs.find((item) => item.id === targetId);
+    if (!job || (job.status !== 'completed' && job.status !== 'failed')) return;
+    if (settledJobIds.current.has(job.id)) return;
+    settledJobIds.current.add(job.id);
+    watchedJobId.current = null;
+    setWaitingJobId(null);
+    setJobNotice(
+      job.status === 'failed'
+        ? (job.errorMessage ?? job.message ?? 'Story plan failed.')
+        : (job.message ?? 'Story plan ready.'),
+    );
+    void statusQuery.refetch();
+    void storiesQuery.refetch();
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.notifications });
+  }, [jobsQuery.data, waitingJobId, projectId, queryClient, statusQuery, storiesQuery]);
 
   useEffect(() => {
     if (!project) return;
@@ -280,8 +307,8 @@ export function StoryComposerPage() {
       {paused ? (
         <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm">
           <p>
-            The story plan or scene generation is running on the server. This page stays paused. A
-            notification is sent when it finishes. Press Refresh stories to load the result.
+            The story plan is running in the background. This page stays paused and checks the job
+            every few seconds. The plan loads here when that job finishes.
           </p>
           <Button
             type="button"
