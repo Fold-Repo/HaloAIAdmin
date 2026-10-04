@@ -116,6 +116,8 @@ export type GenerateEpisodeBatchPayload = {
   generateAll?: boolean;
   /** Write scenes for this one planned episode. */
   episodeNumber?: number;
+  /** Write scenes for these planned episodes. */
+  episodeNumbers?: number[];
 };
 
 export type GenerateEpisodeBatchResult = {

@@ -353,8 +353,16 @@ export function NewProjectWizard() {
                               <Input
                                 id="episodeCount"
                                 type="number"
+                                min={1}
+                                max={50}
                                 {...form.register('episodeCount', { valueAsNumber: true })}
                               />
+                              {!isManual && (
+                                <p className="text-muted-foreground text-xs">
+                                  Up to 50. This writes the story plan only. You generate scenes
+                                  afterward, one episode or a selection at a time.
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="flex justify-end">
@@ -499,7 +507,7 @@ export function NewProjectWizard() {
                             <p className="text-muted-foreground">
                               {isManual
                                 ? 'After creation, you will upload MP4 files for each episode in this same flow.'
-                                : 'After creation, Story Composer will generate your story bible, episodes, and scenes with Claude.'}
+                                : 'After creation, Story Composer writes the story plan only. You then generate scenes for each episode, or for several at once, before video.'}
                             </p>
                           </div>
 
