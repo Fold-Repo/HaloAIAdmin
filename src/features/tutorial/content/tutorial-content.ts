@@ -21,11 +21,20 @@ export const SEED_PROJECT_REF = {
 } as const;
 
 export const WORKFLOW_TABS = [
-  { label: 'Story Bible', description: 'Define logline, characters, lore, and the master document.' },
+  {
+    label: 'Story Bible',
+    description: 'Define logline, characters, lore, and the master document.',
+  },
   { label: 'Episodes', description: 'Plan episode beats, scenes, cliffhangers, and runtime.' },
-  { label: 'AI Generation', description: 'Run script, character, video, voice, and subtitle agents.' },
+  {
+    label: 'AI Generation',
+    description: 'Run script, character, video, voice, and subtitle agents.',
+  },
   { label: 'Rendering', description: 'Monitor FFmpeg/GPU render queue and retry failed jobs.' },
-  { label: 'Publishing', description: 'Configure settings, schedule releases, and publish episodes.' },
+  {
+    label: 'Publishing',
+    description: 'Configure settings, schedule releases, and publish episodes.',
+  },
   { label: 'Analytics', description: 'Track views, revenue, watch time, and AI/render costs.' },
 ] as const;
 

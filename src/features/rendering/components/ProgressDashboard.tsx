@@ -1,10 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  QUEUE_HEALTH_LABELS,
-  formatRenderTime,
-} from '@/features/rendering/utils/rendering.utils';
+import { QUEUE_HEALTH_LABELS, formatRenderTime } from '@/features/rendering/utils/rendering.utils';
 import type { RenderingOverview } from '@/types';
 
 function healthVariant(health: RenderingOverview['queueHealth']) {
@@ -42,9 +39,7 @@ export function ProgressDashboard({ overview }: { overview: RenderingOverview })
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{overview.activeJobs}</p>
-            <p className="text-muted-foreground mt-1 text-xs">
-              {overview.queuedJobs} queued
-            </p>
+            <p className="text-muted-foreground mt-1 text-xs">{overview.queuedJobs} queued</p>
           </CardContent>
         </Card>
         <Card>

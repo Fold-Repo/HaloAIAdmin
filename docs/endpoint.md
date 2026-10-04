@@ -26,10 +26,10 @@ SocketException: ... address = localhost, port = ...
 
 **Cause:** The Flutter app cannot reach your Mac's backend.
 
-| Where you run Flutter | Set `baseUrl` to |
-|----------------------|------------------|
-| **iOS Simulator** | `http://localhost:3000/api` |
-| **Android Emulator** | `http://10.0.2.2:3000/api` |
+| Where you run Flutter       | Set `baseUrl` to                                                  |
+| --------------------------- | ----------------------------------------------------------------- |
+| **iOS Simulator**           | `http://localhost:3000/api`                                       |
+| **Android Emulator**        | `http://10.0.2.2:3000/api`                                        |
 | **Physical iPhone/Android** | `http://<MAC_LAN_IP>:3000/api` e.g. `http://192.168.1.9:3000/api` |
 
 Find your Mac's LAN IP:
@@ -108,13 +108,13 @@ You're right: **secure storage is wiped on uninstall**, so a UUID-only approach 
 
 For HaloReels — where users can earn coins and pay **before** signing in — use a **platform SDK device ID** as `deviceId` so the backend can recognize the same physical device after reinstall.
 
-| Approach | Survives uninstall? | Best for |
-|----------|---------------------|----------|
-| **UUID in secure storage** | ❌ No | Dev/testing only |
-| **Android `ANDROID_ID`** | ✅ Yes (same app reinstall) | Anonymous coins, payment tracing |
-| **iOS `identifierForVendor`** | ⚠️ Only if ≥1 app from your team remains installed; resets if user removes all your apps | Same, with caveat |
-| **iOS Keychain backup** | ✅ Often survives reinstall (same team ID) | Pair with IDFV on iOS |
-| **Social login (Google/Apple)** | ✅ Permanent (account-based) | Ultimate source of truth for paid users |
+| Approach                        | Survives uninstall?                                                                      | Best for                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| **UUID in secure storage**      | ❌ No                                                                                    | Dev/testing only                        |
+| **Android `ANDROID_ID`**        | ✅ Yes (same app reinstall)                                                              | Anonymous coins, payment tracing        |
+| **iOS `identifierForVendor`**   | ⚠️ Only if ≥1 app from your team remains installed; resets if user removes all your apps | Same, with caveat                       |
+| **iOS Keychain backup**         | ✅ Often survives reinstall (same team ID)                                               | Pair with IDFV on iOS                   |
+| **Social login (Google/Apple)** | ✅ Permanent (account-based)                                                             | Ultimate source of truth for paid users |
 
 **Recommended strategy (SDK primary)**
 
@@ -129,10 +129,10 @@ For HaloReels — where users can earn coins and pay **before** signing in — u
 
 **Platform details**
 
-| Platform | SDK field | Stability |
-|----------|-----------|-----------|
-| Android | `AndroidDeviceInfo.id` (`Settings.Secure.ANDROID_ID`) | Stable across uninstall/reinstall of your app. Changes on factory reset. |
-| iOS | `IosDeviceInfo.identifierForVendor` | Stable while any app from your Apple Team ID is installed. New ID if user deletes all your apps then reinstalls. |
+| Platform | SDK field                                             | Stability                                                                                                        |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Android  | `AndroidDeviceInfo.id` (`Settings.Secure.ANDROID_ID`) | Stable across uninstall/reinstall of your app. Changes on factory reset.                                         |
+| iOS      | `IosDeviceInfo.identifierForVendor`                   | Stable while any app from your Apple Team ID is installed. New ID if user deletes all your apps then reinstalls. |
 
 **iOS extra: Keychain persistence**
 
@@ -184,10 +184,10 @@ Authorization: Bearer <accessToken>
 
 ### 4. What requires auth?
 
-| Access | Endpoints |
-|--------|-----------|
-| **No auth** (device ID only) | Catalog, playback, watchlist, rewards, settings, device register |
-| **Social auth required** | `POST /wallet/refill`, `POST /vip/subscribe`, `GET /wallet/transactions`, `GET /auth/me`, `POST /auth/logout` |
+| Access                       | Endpoints                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **No auth** (device ID only) | Catalog, playback, watchlist, rewards, settings, device register                                              |
+| **Social auth required**     | `POST /wallet/refill`, `POST /vip/subscribe`, `GET /wallet/transactions`, `GET /auth/me`, `POST /auth/logout` |
 
 Mobile auth is **Google / Apple only**. Email/password is for the admin/creator web app.
 
@@ -218,9 +218,9 @@ lib/
 ```yaml
 dependencies:
   dio: ^5.0.0
-  device_info_plus: ^10.0.0       # primary — stable SDK device ID
-  flutter_secure_storage: ^9.0.0  # iOS Keychain mirror (survives reinstall)
-  uuid: ^4.0.0                    # fallback only (emulator / web)
+  device_info_plus: ^10.0.0 # primary — stable SDK device ID
+  flutter_secure_storage: ^9.0.0 # iOS Keychain mirror (survives reinstall)
+  uuid: ^4.0.0 # fallback only (emulator / web)
   google_sign_in: ^6.0.0
   sign_in_with_apple: ^6.0.0
 ```
@@ -474,11 +474,13 @@ Legend: **Public** = no Bearer token · **Device** = `X-Device-Id` required · *
 Register or refresh an anonymous device. Call once on first launch, then periodically (e.g. app resume).
 
 **Request**
+
 ```json
 { "deviceId": "550e8400-e29b-41d4-a716-446655440000" }
 ```
 
 **Response `data`**
+
 ```json
 {
   "deviceId": "550e8400-e29b-41d4-a716-446655440000",
@@ -510,6 +512,7 @@ Same as register, useful for deep links or quick checks.
 #### `POST /auth/social/apple` · Public
 
 **Request**
+
 ```json
 {
   "idToken": "<OIDC id_token from Google or Apple SDK>",
@@ -518,6 +521,7 @@ Same as register, useful for deep links or quick checks.
 ```
 
 **Response `data`**
+
 ```json
 {
   "user": {
@@ -543,6 +547,7 @@ Same as register, useful for deep links or quick checks.
 #### `POST /auth/refresh-token` · Public
 
 **Request**
+
 ```json
 { "refreshToken": "abc123..." }
 ```
@@ -564,6 +569,7 @@ Invalidates refresh tokens server-side.
 Home feed (paginated).
 
 **Response `data`**
+
 ```json
 {
   "items": [
@@ -592,6 +598,7 @@ Home feed (paginated).
 Movie detail + episodes list.
 
 **Response `data`**
+
 ```json
 {
   "id": "seed-project-halo-dark-secret",
@@ -648,6 +655,7 @@ Headers: `X-Device-Id: <uuid>`
 Get stream URL for an episode.
 
 **Response `data`**
+
 ```json
 {
   "movieId": "seed-project-halo-dark-secret",
@@ -669,6 +677,7 @@ Use `streamUrl` with your video player (e.g. `video_player`, `better_player`, or
 Save watch position.
 
 **Request**
+
 ```json
 { "positionSec": 45, "durationSec": 60 }
 ```
@@ -678,6 +687,7 @@ Save watch position.
 Unlock a locked episode using device coins (10 coins default). No sign-in required.
 
 **Response `data`**
+
 ```json
 {
   "unlocked": true,
@@ -700,17 +710,17 @@ Headers: `X-Device-Id: <uuid>`
 Replace entire list.
 
 **Request**
+
 ```json
 {
-  "items": [
-    { "movieId": "seed-project-halo-dark-secret", "watchedAt": "2026-07-28T12:00:00.000Z" }
-  ]
+  "items": [{ "movieId": "seed-project-halo-dark-secret", "watchedAt": "2026-07-28T12:00:00.000Z" }]
 }
 ```
 
 #### `POST /watchlist/items`
 
 **Request**
+
 ```json
 {
   "movieId": "seed-project-halo-dark-secret",
@@ -745,6 +755,7 @@ Headers: `X-Device-Id` recommended
 #### `PATCH /settings`
 
 **Request**
+
 ```json
 {
   "autoPlayNextEpisode": true,
@@ -766,6 +777,7 @@ Headers: `X-Device-Id` recommended
 #### `POST /feedback`
 
 **Request**
+
 ```json
 { "message": "Love the app!", "rating": 5, "email": "optional@example.com" }
 ```
@@ -773,6 +785,7 @@ Headers: `X-Device-Id` recommended
 #### `POST /invitation/redeem`
 
 **Request**
+
 ```json
 { "code": "HALO2026" }
 ```
@@ -792,6 +805,7 @@ Payment history (requires social sign-in).
 #### `POST /wallet/refill` · **Auth**
 
 **Request**
+
 ```json
 {
   "packageId": "coins-550",
@@ -808,6 +822,7 @@ List subscription plans.
 #### `POST /vip/subscribe` · **Auth**
 
 **Request**
+
 ```json
 {
   "planId": "vip-monthly",
@@ -852,12 +867,12 @@ App resume
 
 ## Error handling
 
-| HTTP | Meaning | Flutter action |
-|------|---------|----------------|
-| 400 | Bad request (e.g. missing device ID, insufficient coins) | Show error message from `message` |
-| 401 | Unauthorized | Refresh token or prompt social sign-in |
-| 404 | Movie/episode not found | Show empty state |
-| 409 | Conflict | Rare — retry or show message |
+| HTTP | Meaning                                                  | Flutter action                         |
+| ---- | -------------------------------------------------------- | -------------------------------------- |
+| 400  | Bad request (e.g. missing device ID, insufficient coins) | Show error message from `message`      |
+| 401  | Unauthorized                                             | Refresh token or prompt social sign-in |
+| 404  | Movie/episode not found                                  | Show empty state                       |
+| 409  | Conflict                                                 | Rare — retry or show message           |
 
 ---
 

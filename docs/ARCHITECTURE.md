@@ -28,12 +28,12 @@ features/<module>/
 
 ## Shared UI patterns
 
-| State | Component | Usage |
-|-------|-----------|-------|
-| Loading | `LoadingScreen`, `PageSkeleton`, `Spinner` | Full-page or section loading |
-| Empty | `EmptyState` | Lists/grids with no data |
-| Error | `QueryError` | Failed TanStack Query fetches |
-| Crash | `ErrorBoundary`, `FeatureErrorBoundary` | Uncaught render errors |
+| State   | Component                                  | Usage                         |
+| ------- | ------------------------------------------ | ----------------------------- |
+| Loading | `LoadingScreen`, `PageSkeleton`, `Spinner` | Full-page or section loading  |
+| Empty   | `EmptyState`                               | Lists/grids with no data      |
+| Error   | `QueryError`                               | Failed TanStack Query fetches |
+| Crash   | `ErrorBoundary`, `FeatureErrorBoundary`    | Uncaught render errors        |
 
 Use `combineQueryState()` from `@/utils/query-state` when a page coordinates multiple queries.
 
@@ -67,12 +67,12 @@ Every data-driven page must handle:
 
 ## Testing
 
-| Layer | Tool | Location |
-|-------|------|----------|
-| Unit | Vitest | `src/tests/unit/` |
-| Integration | Vitest + RTL | `src/tests/integration/` |
-| E2E | Playwright | `src/tests/e2e/` |
-| Accessibility | axe-core | `src/tests/e2e/accessibility.spec.ts` |
+| Layer         | Tool         | Location                              |
+| ------------- | ------------ | ------------------------------------- |
+| Unit          | Vitest       | `src/tests/unit/`                     |
+| Integration   | Vitest + RTL | `src/tests/integration/`              |
+| E2E           | Playwright   | `src/tests/e2e/`                      |
+| Accessibility | axe-core     | `src/tests/e2e/accessibility.spec.ts` |
 
 ## Adding a new feature module
 
@@ -85,15 +85,15 @@ Every data-driven page must handle:
 
 ## Infrastructure
 
-| Path | Purpose |
-|------|---------|
-| `src/api/` | Axios client, interceptors, token refresh |
-| `src/store/` | Zustand global state (auth) |
-| `src/layouts/` | App shells with error boundaries |
-| `src/routes/` | React Router config |
-| `src/monitoring/` | Error reporting, web vitals |
-| `k8s/` | Kubernetes manifests |
-| `.github/workflows/` | CI and release pipelines |
+| Path                         | Purpose                                                          |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `src/api/`                   | Axios client, interceptors, token refresh                        |
+| `src/store/`                 | Zustand global state (auth)                                      |
+| `src/layouts/`               | App shells with error boundaries                                 |
+| `src/routes/`                | React Router config                                              |
+| `src/monitoring/`            | Error reporting, web vitals                                      |
+| `k8s/`                       | Kubernetes manifests                                             |
+| `.github/workflows/`         | CI and release pipelines                                         |
 | `backend/storage/assembled/` | Episode MP4s after FFmpeg assembly (gitignored; persist in prod) |
 
 Episode video assembly requires **FFmpeg on the backend host** (not the browser). See [EPISODE_ASSEMBLY.md](./EPISODE_ASSEMBLY.md).

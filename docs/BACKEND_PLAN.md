@@ -26,15 +26,15 @@ The backend lives in **`backend/`** as a standalone NestJS service. It can run a
 
 ### Stack
 
-| Layer | Choice |
-|-------|--------|
-| Runtime | Node.js ≥ 20 |
-| Framework | NestJS 11 + TypeScript |
-| ORM | Prisma + PostgreSQL |
-| Auth | JWT access + refresh tokens, bcrypt passwords |
-| Queues | BullMQ + Redis (Phase 4+) |
-| Validation | class-validator + class-transformer |
-| Docs | Swagger at `/api/docs` (optional) |
+| Layer      | Choice                                        |
+| ---------- | --------------------------------------------- |
+| Runtime    | Node.js ≥ 20                                  |
+| Framework  | NestJS 11 + TypeScript                        |
+| ORM        | Prisma + PostgreSQL                           |
+| Auth       | JWT access + refresh tokens, bcrypt passwords |
+| Queues     | BullMQ + Redis (Phase 4+)                     |
+| Validation | class-validator + class-transformer           |
+| Docs       | Swagger at `/api/docs` (optional)             |
 
 ### API contract rules
 
@@ -89,16 +89,16 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Goal:** Bootable API with health check, DB, Docker, response envelope.
 
-| Task | Details |
-|------|---------|
-| NestJS bootstrap | `backend/` app, CORS for `localhost:5173`, global prefix `/api` |
-| Response interceptor | Wrap all success responses in `{ success, data }` |
-| Exception filter | Map errors to frontend `ApiError` shape |
-| Config module | `.env`: `DATABASE_URL`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN` |
-| Prisma + PostgreSQL | Initial schema: `User`, `RefreshToken` |
-| Health | `GET /api/health` |
-| Docker | `backend/docker-compose.yml`, `backend/Dockerfile` |
-| Root compose profile | `docker compose --profile full up` |
+| Task                 | Details                                                         |
+| -------------------- | --------------------------------------------------------------- |
+| NestJS bootstrap     | `backend/` app, CORS for `localhost:5173`, global prefix `/api` |
+| Response interceptor | Wrap all success responses in `{ success, data }`               |
+| Exception filter     | Map errors to frontend `ApiError` shape                         |
+| Config module        | `.env`: `DATABASE_URL`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN`     |
+| Prisma + PostgreSQL  | Initial schema: `User`, `RefreshToken`                          |
+| Health               | `GET /api/health`                                               |
+| Docker               | `backend/docker-compose.yml`, `backend/Dockerfile`              |
+| Root compose profile | `docker compose --profile full up`                              |
 
 **Exit criteria:** `curl http://localhost:3000/api/health` returns 200; frontend can reach API without CORS errors.
 
@@ -108,16 +108,16 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [API_SPEC § Authentication](./API_SPEC.md#authentication-auth)
 
-| Endpoint group | Priority |
-|----------------|----------|
-| `POST /auth/login` | P0 |
-| `GET /auth/session` | P0 |
-| `POST /auth/refresh` | P0 |
-| `POST /auth/logout` | P0 |
-| `POST /auth/register` | P1 |
-| `PATCH /auth/onboarding` | P1 |
-| OTP + password reset | P2 |
-| OAuth redirect | P3 |
+| Endpoint group           | Priority |
+| ------------------------ | -------- |
+| `POST /auth/login`       | P0       |
+| `GET /auth/session`      | P0       |
+| `POST /auth/refresh`     | P0       |
+| `POST /auth/logout`      | P0       |
+| `POST /auth/register`    | P1       |
+| `PATCH /auth/onboarding` | P1       |
+| OTP + password reset     | P2       |
+| OAuth redirect           | P3       |
 
 **Tasks:**
 
@@ -135,14 +135,14 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [API_SPEC § Creator](./API_SPEC.md#creator-studio-creator)
 
-| Domain | Endpoints | Prisma models |
-|--------|-----------|---------------|
-| Dashboard | `GET /creator/dashboard/stats` | aggregates |
-| Projects | CRUD `/creator/projects` | `Project` |
-| Series | CRUD `/creator/series` | `Series` |
-| Seasons | CRUD nested under series | `Season` |
-| Jobs | `GET /creator/jobs` | `Job` (stub) |
-| Notifications | list + mark read | `Notification` |
+| Domain        | Endpoints                      | Prisma models  |
+| ------------- | ------------------------------ | -------------- |
+| Dashboard     | `GET /creator/dashboard/stats` | aggregates     |
+| Projects      | CRUD `/creator/projects`       | `Project`      |
+| Series        | CRUD `/creator/series`         | `Series`       |
+| Seasons       | CRUD nested under series       | `Season`       |
+| Jobs          | `GET /creator/jobs`            | `Job` (stub)   |
+| Notifications | list + mark read               | `Notification` |
 
 **Tasks:**
 
@@ -159,11 +159,11 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [Story bible](./API_SPEC.md#story-bible) + [Episode planner](./API_SPEC.md#episode-planner)
 
-| Module | Models |
-|--------|--------|
+| Module      | Models                                                                         |
+| ----------- | ------------------------------------------------------------------------------ |
 | Story bible | `StoryBible`, nested JSON or normalized tables for characters, locations, etc. |
-| Versions | `StoryDocumentVersion` |
-| Episodes | `Episode`, `Scene` |
+| Versions    | `StoryDocumentVersion`                                                         |
+| Episodes    | `Episode`, `Scene`                                                             |
 
 **Tasks:**
 
@@ -180,12 +180,12 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [AI generation](./API_SPEC.md#ai-generation) + [Rendering](./API_SPEC.md#rendering)
 
-| Concern | Approach |
-|---------|----------|
-| Agent runs | Enqueue BullMQ job; return `{ jobId, status: 'queued' }` |
-| Pipeline | Multi-step job chain |
-| Render queue | `RenderJob` model + worker status polling |
-| GPU/workers | Read from worker registry (mock → real agents) |
+| Concern      | Approach                                                 |
+| ------------ | -------------------------------------------------------- |
+| Agent runs   | Enqueue BullMQ job; return `{ jobId, status: 'queued' }` |
+| Pipeline     | Multi-step job chain                                     |
+| Render queue | `RenderJob` model + worker status polling                |
+| GPU/workers  | Read from worker registry (mock → real agents)           |
 
 **Tasks:**
 
@@ -202,10 +202,10 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [Publishing](./API_SPEC.md#publishing) + [Analytics](./API_SPEC.md#analytics)
 
-| Module | Notes |
-|--------|-------|
-| Publishing | Settings, schedule, HLS metadata, categories catalog |
-| Analytics | Pre-aggregated tables or materialized views; export generates signed URL |
+| Module     | Notes                                                                    |
+| ---------- | ------------------------------------------------------------------------ |
+| Publishing | Settings, schedule, HLS metadata, categories catalog                     |
+| Analytics  | Pre-aggregated tables or materialized views; export generates signed URL |
 
 **Tasks:**
 
@@ -222,12 +222,12 @@ docs/API_SPEC.md                        ← endpoint contract
 
 **Spec:** [Admin portal](./API_SPEC.md#admin-portal-admin)
 
-| Feature | Guard |
-|---------|-------|
-| User/creator management | `@Roles('admin')` |
-| Moderation queue | audit log on action |
-| Feature flags | `FeatureFlag` table |
-| System health | probe DB, Redis, queue depth |
+| Feature                 | Guard                        |
+| ----------------------- | ---------------------------- |
+| User/creator management | `@Roles('admin')`            |
+| Moderation queue        | audit log on action          |
+| Feature flags           | `FeatureFlag` table          |
+| System health           | probe DB, Redis, queue depth |
 
 **Exit criteria:** Admin routes reject non-admin; admin UI fully functional.
 
@@ -235,15 +235,15 @@ docs/API_SPEC.md                        ← endpoint contract
 
 ### Phase 7 — Production hardening (Week 8+)
 
-| Task | Details |
-|------|---------|
-| Worker services | Separate containers for AI + FFmpeg |
-| OAuth | Google/GitHub/Apple passport strategies |
-| Email | OTP + forgot password via SendGrid/SES |
-| Object storage | S3/GCS for thumbnails, HLS, exports |
-| Observability | OpenTelemetry, structured logs |
-| CI | GitHub Actions: lint, test, migrate, build image |
-| K8s | `backend/k8s/` deployment manifest |
+| Task            | Details                                          |
+| --------------- | ------------------------------------------------ |
+| Worker services | Separate containers for AI + FFmpeg              |
+| OAuth           | Google/GitHub/Apple passport strategies          |
+| Email           | OTP + forgot password via SendGrid/SES           |
+| Object storage  | S3/GCS for thumbnails, HLS, exports              |
+| Observability   | OpenTelemetry, structured logs                   |
+| CI              | GitHub Actions: lint, test, migrate, build image |
+| K8s             | `backend/k8s/` deployment manifest               |
 
 ---
 
@@ -291,12 +291,12 @@ docker compose up --build
 docker compose --profile full up --build
 ```
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:8080 |
-| API | http://localhost:3000/api |
-| Postgres | localhost:5432 |
-| Redis | localhost:6379 |
+| Service  | URL                       |
+| -------- | ------------------------- |
+| Frontend | http://localhost:8080     |
+| API      | http://localhost:3000/api |
+| Postgres | localhost:5432            |
+| Redis    | localhost:6379            |
 
 ### 5. Independent production deploy
 
@@ -330,12 +330,12 @@ See `backend/prisma/schema.prisma` for the Phase 0–1 starter.
 
 ## Testing strategy
 
-| Layer | Tool |
-|-------|------|
-| Unit | Jest (NestJS default) |
-| Integration | Supertest + test PostgreSQL |
-| Contract | Compare responses to `src/types` shapes |
-| E2E | Point frontend E2E at real API with test DB seed |
+| Layer       | Tool                                             |
+| ----------- | ------------------------------------------------ |
+| Unit        | Jest (NestJS default)                            |
+| Integration | Supertest + test PostgreSQL                      |
+| Contract    | Compare responses to `src/types` shapes          |
+| E2E         | Point frontend E2E at real API with test DB seed |
 
 ---
 

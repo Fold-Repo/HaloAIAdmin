@@ -20,7 +20,10 @@ export function initWebVitals() {
     const clsObserver = new PerformanceObserver((list) => {
       let clsValue = 0;
       for (const entry of list.getEntries()) {
-        if ('hadRecentInput' in entry && !(entry as PerformanceEntry & { hadRecentInput?: boolean }).hadRecentInput) {
+        if (
+          'hadRecentInput' in entry &&
+          !(entry as PerformanceEntry & { hadRecentInput?: boolean }).hadRecentInput
+        ) {
           clsValue += (entry as PerformanceEntry & { value?: number }).value ?? 0;
         }
       }
@@ -34,7 +37,8 @@ export function initWebVitals() {
   }
 
   window.addEventListener('load', () => {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    const navigation = performance.getEntriesByType('navigation')[0] as
+      PerformanceNavigationTiming | undefined;
     if (navigation) {
       monitoringService.trackMetric(
         'web_vital.ttfb',

@@ -41,7 +41,11 @@ export const VISIBILITY_OPTIONS = [
   { value: 'public', label: 'Public', description: 'Visible to everyone on the platform' },
   { value: 'unlisted', label: 'Unlisted', description: 'Accessible via direct link only' },
   { value: 'private', label: 'Private', description: 'Only you and collaborators can view' },
-  { value: 'scheduled', label: 'Scheduled', description: 'Publish automatically at scheduled time' },
+  {
+    value: 'scheduled',
+    label: 'Scheduled',
+    description: 'Publish automatically at scheduled time',
+  },
 ] as const;
 
 export function getPublishingPath(projectId: string, section: PublishingSection = 'wizard') {

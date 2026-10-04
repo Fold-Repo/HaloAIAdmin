@@ -10,10 +10,7 @@ import { LoadingScreen, QueryError } from '@/components/common';
 import { SeriesGrid } from '@/features/creator/components/SeriesManagement';
 import { useCreateSeries } from '@/features/creator/hooks/useCreatorMutations';
 import { useSeriesList } from '@/features/creator/hooks/useCreatorQueries';
-import {
-  seriesSchema,
-  type SeriesFormValues,
-} from '@/features/creator/schemas/creator.schemas';
+import { seriesSchema, type SeriesFormValues } from '@/features/creator/schemas/creator.schemas';
 
 export function SeriesPage() {
   const [showForm, setShowForm] = useState(false);
@@ -63,10 +60,7 @@ export function SeriesPage() {
       </div>
 
       {showForm && (
-        <form
-          onSubmit={onSubmit}
-          className="bg-card space-y-4 rounded-xl border p-6"
-        >
+        <form onSubmit={onSubmit} className="bg-card space-y-4 rounded-xl border p-6">
           <div className="space-y-2">
             <Label htmlFor="series-title">Title</Label>
             <Input id="series-title" {...form.register('title')} />

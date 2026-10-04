@@ -48,10 +48,7 @@ export function RewardedAdsDashboardPanel({ metrics }: { metrics: RewardedAdsMet
           <CardTitle className="text-base">Ad revenue trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <MetricLineChart
-            data={metrics.series}
-            valueFormatter={(value) => formatUsd(value)}
-          />
+          <MetricLineChart data={metrics.series} valueFormatter={(value) => formatUsd(value)} />
         </CardContent>
       </Card>
     </div>

@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -109,7 +108,6 @@ export function StoryComposerPage() {
   const [expandDirection, setExpandDirection] = useState('');
   const [expandFinale, setExpandFinale] = useState(false);
   const [autoComposeAttempted, setAutoComposeAttempted] = useState(false);
-  const [selectedEpisodes, setSelectedEpisodes] = useState<number[]>([]);
   const settledJobIds = useRef(new Set<string>());
   const watchedJobId = useRef<string | null>(null);
 
@@ -257,9 +255,9 @@ export function StoryComposerPage() {
         </div>
         <p className="text-muted-foreground text-sm">
           A new AI project writes the story plan for up to 50 episodes and stops there. Generate
-          scenes for one episode, or select several. Video opens when an episode’s scenes are ready.
-          The page stays paused until you refresh. Each episode targets at least 1:40 (
-          {targetRuntimeSec}s) with 7+ scenes.
+          scenes on that episode. Video opens when an episode’s scenes are ready. The page stays
+          paused until you refresh. Each episode targets at least 1:40 ({targetRuntimeSec}s) with 7+
+          scenes.
         </p>
       </div>
 
@@ -433,8 +431,8 @@ export function StoryComposerPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <p className="text-muted-foreground">
-              The story plan is already written. Generate scenes for one episode, or select several
-              and generate those scenes together. Video opens once an episode’s scenes are ready.
+              The story plan is already written. If an episode has no scenes, use Generate scenes on
+              that episode only.
             </p>
             <div className="flex flex-wrap items-end gap-2">
               <div className="space-y-2">
@@ -461,75 +459,14 @@ export function StoryComposerPage() {
                 {rememberSeasonSize.isPending ? 'Saving…' : 'Remember season size'}
               </Button>
             </div>
-            {(status.seasonEpisodes?.some((episode) => episode.status === 'outline-ready') ??
-              false) && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={paused}
-                  onClick={() =>
-                    setSelectedEpisodes(
-                      (status.seasonEpisodes ?? [])
-                        .filter((episode) => episode.status === 'outline-ready')
-                        .map((episode) => episode.number),
-                    )
-                  }
-                >
-                  Select episodes without scenes
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={paused || generateBatch.isPending || selectedEpisodes.length === 0}
-                  onClick={() => {
-                    const episodeNumbers = [...selectedEpisodes].sort(
-                      (left, right) => left - right,
-                    );
-                    generateBatch.mutate(
-                      { episodeNumbers },
-                      {
-                        onSuccess: (data) => {
-                          if ('jobId' in data && data.jobId) {
-                            setWaitingJobId(data.jobId);
-                            setJobNotice(null);
-                            setSelectedEpisodes([]);
-                          }
-                        },
-                      },
-                    );
-                  }}
-                >
-                  {selectedEpisodes.length > 0
-                    ? `Generate scenes for ${selectedEpisodes.length} selected`
-                    : 'Generate scenes for selected'}
-                </Button>
-              </div>
-            )}
             {(status.seasonEpisodes?.length ?? 0) > 0 && (
               <ul className="space-y-2">
                 {status.seasonEpisodes?.map((episode) => {
                   const nextToPlan = status.seasonEpisodes?.find(
                     (item) => item.status === 'not-planned',
                   )?.number;
-                  const checked = selectedEpisodes.includes(episode.number);
                   return (
                     <li key={episode.number} className="flex flex-wrap items-center gap-2">
-                      {episode.status === 'outline-ready' ? (
-                        <Checkbox
-                          checked={checked}
-                          disabled={paused}
-                          aria-label={`Select episode ${episode.number}`}
-                          onCheckedChange={(value) => {
-                            setSelectedEpisodes((current) =>
-                              value === true
-                                ? [...current, episode.number]
-                                : current.filter((number) => number !== episode.number),
-                            );
-                          }}
-                        />
-                      ) : null}
                       <Badge variant={episode.status === 'scenes-ready' ? 'secondary' : 'outline'}>
                         Ep {episode.number}
                       </Badge>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Film } from 'lucide-react';
 
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { DeleteEpisodeDialog } from '@/features/episode-planner/components/DeleteEpisodeDialog';
+import { useGenerateEpisodeBatch } from '@/features/story-bible/hooks/useStoryBible';
 import {
   EPISODE_STATUS_LABELS,
   formatRuntime,
@@ -23,9 +25,16 @@ import type { Episode } from '@/types';
 type EpisodeCardProps = {
   episode: Episode;
   projectId: string;
+  generatingScenes?: boolean;
+  onGenerateScenes?: () => void;
 };
 
-export function EpisodeCard({ episode, projectId }: EpisodeCardProps) {
+export function EpisodeCard({
+  episode,
+  projectId,
+  generatingScenes = false,
+  onGenerateScenes,
+}: EpisodeCardProps) {
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
@@ -64,7 +73,18 @@ export function EpisodeCard({ episode, projectId }: EpisodeCardProps) {
           <strong>Cliffhanger:</strong> {episode.cliffhanger}
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
+        {episode.sceneCount === 0 && onGenerateScenes ? (
+          <Button
+            type="button"
+            size="sm"
+            className="w-full"
+            disabled={generatingScenes}
+            onClick={onGenerateScenes}
+          >
+            {generatingScenes ? 'Starting…' : 'Generate scenes'}
+          </Button>
+        ) : null}
         <Button asChild variant="outline" size="sm" className="w-full">
           <Link to={getEpisodeDetailPath(projectId, episode.id)}>
             <Film className="size-4" />
@@ -82,6 +102,9 @@ type EpisodeListProps = {
 };
 
 export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
+  const generateScenes = useGenerateEpisodeBatch(projectId);
+  const [startedEpisode, setStartedEpisode] = useState<number | null>(null);
+
   if (episodes.length === 0) {
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed px-6 py-16 text-center text-sm">
@@ -91,10 +114,40 @@ export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {episodes.map((episode) => (
-        <EpisodeCard key={episode.id} episode={episode} projectId={projectId} />
-      ))}
+    <div className="space-y-3">
+      {generateScenes.error ? (
+        <p className="text-destructive text-sm" role="alert">
+          {generateScenes.error.message}
+        </p>
+      ) : null}
+      {startedEpisode != null && !generateScenes.isPending ? (
+        <p className="text-muted-foreground text-sm">
+          Scene generation for episode {startedEpisode} is running. Refresh this page when the
+          notification arrives.
+        </p>
+      ) : null}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {episodes.map((episode) => (
+          <EpisodeCard
+            key={episode.id}
+            episode={episode}
+            projectId={projectId}
+            generatingScenes={generateScenes.isPending}
+            onGenerateScenes={
+              episode.sceneCount === 0
+                ? () => {
+                    generateScenes.mutate(
+                      { count: 1, episodeNumber: episode.number },
+                      {
+                        onSuccess: () => setStartedEpisode(episode.number),
+                      },
+                    );
+                  }
+                : undefined
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 }

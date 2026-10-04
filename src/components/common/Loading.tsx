@@ -16,7 +16,7 @@ const sizeMap = {
 export function Spinner({ className, size = 'md' }: SpinnerProps) {
   return (
     <Loader2
-      className={cn('animate-spin text-muted-foreground', sizeMap[size], className)}
+      className={cn('text-muted-foreground animate-spin', sizeMap[size], className)}
       aria-hidden="true"
     />
   );

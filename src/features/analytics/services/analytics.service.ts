@@ -32,14 +32,12 @@ export const analyticsService = {
   getCompletion: (projectId: string) =>
     apiGet<ApiResponse<CompletionMetrics>>(`${BASE(projectId)}/completion`),
 
-  getAiCost: (projectId: string) =>
-    apiGet<ApiResponse<CostMetrics>>(`${BASE(projectId)}/ai-cost`),
+  getAiCost: (projectId: string) => apiGet<ApiResponse<CostMetrics>>(`${BASE(projectId)}/ai-cost`),
 
   getRenderCost: (projectId: string) =>
     apiGet<ApiResponse<CostMetrics>>(`${BASE(projectId)}/render-cost`),
 
-  getGrowth: (projectId: string) =>
-    apiGet<ApiResponse<GrowthMetrics>>(`${BASE(projectId)}/growth`),
+  getGrowth: (projectId: string) => apiGet<ApiResponse<GrowthMetrics>>(`${BASE(projectId)}/growth`),
 
   getRetention: (projectId: string) =>
     apiGet<ApiResponse<RetentionMetrics>>(`${BASE(projectId)}/retention`),

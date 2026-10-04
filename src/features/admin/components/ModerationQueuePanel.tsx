@@ -29,8 +29,7 @@ export function ModerationQueuePanel({ items }: { items: ModerationItem[] }) {
                   <div>
                     <p className="font-medium">{item.title}</p>
                     <p className="text-muted-foreground mt-1 text-xs">
-                      {item.contentType} · {item.creatorName} ·{' '}
-                      {formatRelativeDate(item.flaggedAt)}
+                      {item.contentType} · {item.creatorName} · {formatRelativeDate(item.flaggedAt)}
                     </p>
                   </div>
                   <Badge variant="warning">Pending</Badge>

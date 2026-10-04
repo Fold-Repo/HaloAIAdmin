@@ -36,17 +36,9 @@ export function CharactersSection({ projectId, characters }: CharactersSectionPr
   );
 }
 
-function CharacterCard({
-  projectId,
-  character,
-}: {
-  projectId: string;
-  character: StoryCharacter;
-}) {
+function CharacterCard({ projectId, character }: { projectId: string; character: StoryCharacter }) {
   const generateImage = useGenerateCharacterImage(projectId);
-  const imageApiUrl = character.imageUrl
-    ? getCharacterImageApiUrl(projectId, character.id)
-    : null;
+  const imageApiUrl = character.imageUrl ? getCharacterImageApiUrl(projectId, character.id) : null;
 
   return (
     <EntityCard title={character.name} subtitle={character.role}>
