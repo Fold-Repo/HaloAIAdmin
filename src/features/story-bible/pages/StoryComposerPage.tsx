@@ -22,12 +22,13 @@ import {
   useComposerStatus,
   useExpandEpisodes,
   useGenerateEpisodeBatch,
+  usePlanEpisode,
   useRememberSeasonSize,
   useStoryBoard,
   useSyncStorySummary,
 } from '@/features/story-bible/hooks/useStoryBible';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
-import type { AiJob, ComposerNextStep, GenerateEpisodeBatchAccepted } from '@/types';
+import type { AiJob, ComposerNextStep } from '@/types';
 
 const COMPOSER_JOB_AGENTS = new Set([
   'story-composer-compose',
@@ -92,6 +93,7 @@ export function StoryComposerPage() {
   const storiesQuery = useStoryBoard(projectId);
   const composeStory = useComposeStory(projectId);
   const generateBatch = useGenerateEpisodeBatch(projectId);
+  const planEpisode = usePlanEpisode(projectId);
   const rememberSeasonSize = useRememberSeasonSize(projectId);
   const expandEpisodes = useExpandEpisodes(projectId);
   const syncSummary = useSyncStorySummary(projectId);
@@ -225,9 +227,9 @@ export function StoryComposerPage() {
           <Badge variant="secondary">{project.title}</Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Plan the full season, then the server writes scenes two episodes at a time. Each batch
-          sends a notification when those scenes are saved. This page stays paused until you
-          refresh. Each episode targets at least 1:40 ({targetRuntimeSec}s) with 7+ scenes.
+          Create the story plan first. When an episode has a plan and no scenes, use Generate scenes
+          on that episode. The page stays paused until you refresh. Each episode targets at least
+          1:40 ({targetRuntimeSec}s) with 7+ scenes.
         </p>
       </div>
 
@@ -275,9 +277,8 @@ export function StoryComposerPage() {
       {paused ? (
         <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm">
           <p>
-            Story generation is running on the server, two episodes at a time. This page stays
-            paused. A notification is sent after each batch, including that batch’s scenes. Press
-            Refresh stories to load the episodes that are already done.
+            The story plan or scene generation is running on the server. This page stays paused. A
+            notification is sent when it finishes. Press Refresh stories to load the result.
           </p>
           <Button
             type="button"
@@ -327,8 +328,8 @@ export function StoryComposerPage() {
                   }
                 />
                 <p className="text-muted-foreground text-xs">
-                  Up to 50. The full plot is planned first, then every episode’s scenes are written
-                  in the background.
+                  Up to 50. This writes the story plan only. Generate scenes afterward, one episode
+                  at a time.
                 </p>
               </div>
               <div className="space-y-2">
@@ -349,7 +350,7 @@ export function StoryComposerPage() {
                 ? 'Starting…'
                 : paused
                   ? 'Paused until you refresh'
-                  : 'Plan full story & generate all episodes'}
+                  : 'Create story plan'}
             </Button>
           </CardContent>
         </Card>
@@ -395,12 +396,12 @@ export function StoryComposerPage() {
       {status.hasStoryOverview && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Episode batches</CardTitle>
+            <CardTitle className="text-base">Episodes</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <p className="text-muted-foreground">
-              Each batch is two episodes. Finished batches keep their scenes. Raise the season size
-              if later episodes disappeared, then generate the next batch.
+              Create the story plan for an episode first. When that plan has no scenes, use Generate
+              scenes on that episode.
             </p>
             <div className="flex flex-wrap items-end gap-2">
               <div className="space-y-2">
@@ -427,23 +428,70 @@ export function StoryComposerPage() {
                 {rememberSeasonSize.isPending ? 'Saving…' : 'Remember season size'}
               </Button>
             </div>
-            {(status.episodeBatches?.length ?? 0) > 0 && (
-              <ul className="space-y-1">
-                {status.episodeBatches?.map((batch) => (
-                  <li key={batch.start} className="flex items-center gap-2">
-                    <Badge variant={batch.status === 'scenes-ready' ? 'secondary' : 'outline'}>
-                      Ep {batch.start}
-                      {batch.end !== batch.start ? `–${batch.end}` : ''}
-                    </Badge>
-                    <span className="text-muted-foreground text-xs">
-                      {batch.status === 'scenes-ready'
-                        ? 'scenes ready'
-                        : batch.status === 'outline-ready'
-                          ? 'outline ready'
-                          : 'not written yet'}
-                    </span>
-                  </li>
-                ))}
+            {(status.seasonEpisodes?.length ?? 0) > 0 && (
+              <ul className="space-y-2">
+                {status.seasonEpisodes?.map((episode) => {
+                  const nextToPlan = status.seasonEpisodes?.find(
+                    (item) => item.status === 'not-planned',
+                  )?.number;
+                  return (
+                    <li key={episode.number} className="flex flex-wrap items-center gap-2">
+                      <Badge variant={episode.status === 'scenes-ready' ? 'secondary' : 'outline'}>
+                        Ep {episode.number}
+                      </Badge>
+                      <span className="min-w-0 flex-1 text-sm">{episode.title}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {episode.status === 'scenes-ready'
+                          ? 'scenes ready'
+                          : episode.status === 'outline-ready'
+                            ? 'plan ready, no scenes'
+                            : 'no story plan'}
+                      </span>
+                      {episode.status === 'not-planned' && episode.number === nextToPlan && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={paused || planEpisode.isPending}
+                          onClick={() => {
+                            planEpisode.mutate(episode.number, {
+                              onSuccess: (data) => {
+                                if (data.jobId) {
+                                  setWaitingJobId(data.jobId);
+                                  setJobNotice(null);
+                                }
+                              },
+                            });
+                          }}
+                        >
+                          Create story plan
+                        </Button>
+                      )}
+                      {episode.status === 'outline-ready' && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={paused || generateBatch.isPending}
+                          onClick={() => {
+                            generateBatch.mutate(
+                              { count: 1, episodeNumber: episode.number },
+                              {
+                                onSuccess: (data) => {
+                                  if ('jobId' in data && data.jobId) {
+                                    setWaitingJobId(data.jobId);
+                                    setJobNotice(null);
+                                  }
+                                },
+                              },
+                            );
+                          }}
+                        >
+                          Generate scenes
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </CardContent>
@@ -457,7 +505,8 @@ export function StoryComposerPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="text-muted-foreground">
-              The full plot is in the story bible. Review before generating more scenes or video.
+              The full plot is in the story bible. Episodes with a plan and no scenes can generate
+              scenes from here.
             </p>
             <ul className="space-y-1">
               {status.episodePlanPreview.map((entry) => (
@@ -467,8 +516,29 @@ export function StoryComposerPage() {
                   </Badge>
                   <span>{entry.title}</span>
                   <span className="text-muted-foreground text-xs">({entry.actPhase})</span>
-                  {entry.generated && (
+                  {entry.generated ? (
                     <span className="text-muted-foreground text-xs">scenes ready</span>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={paused || generateBatch.isPending}
+                      onClick={() => {
+                        generateBatch.mutate(
+                          { count: 1, episodeNumber: entry.number },
+                          {
+                            onSuccess: (data) => {
+                              if ('jobId' in data && data.jobId) {
+                                setWaitingJobId(data.jobId);
+                                setJobNotice(null);
+                              }
+                            },
+                          },
+                        );
+                      }}
+                    >
+                      Generate scenes
+                    </Button>
                   )}
                 </li>
               ))}
@@ -486,57 +556,10 @@ export function StoryComposerPage() {
         <FullStoryBoard stories={storiesQuery.data} generating={false} />
       )}
 
-      {status.pendingEpisodeCount > 0 && status.nextBatch && (
-        <Card className="border-primary/30">
-          <CardHeader>
-            <CardTitle className="text-base">Generate remaining episodes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-              {status.pendingEpisodeCount} of {status.plannedEpisodeCount} episodes still need
-              stories. Next batch: episode
-              {status.nextBatch.size > 1 ? 's' : ''} {status.nextBatch.start}
-              {status.nextBatch.size > 1 ? `–${status.nextBatch.end}` : ''}. This writes the outline
-              if it is missing, then the scenes for that batch only.
-            </p>
-            {generateBatch.error && (
-              <p className="text-destructive text-sm" role="alert">
-                {generateBatch.error.message}
-              </p>
-            )}
-            {!paused &&
-            (generateBatch.data as GenerateEpisodeBatchAccepted | undefined)?.message ? (
-              <p className="text-muted-foreground text-xs">
-                {(generateBatch.data as GenerateEpisodeBatchAccepted).message}
-              </p>
-            ) : null}
-            <Button
-              disabled={generateBatch.isPending || paused}
-              onClick={() => {
-                if (paused) return;
-                const nextBatch = status.nextBatch;
-                if (!nextBatch) return;
-                generateBatch.mutate(
-                  { count: nextBatch.size },
-                  {
-                    onSuccess: (data) => {
-                      if ('jobId' in data && data.jobId) {
-                        setWaitingJobId(data.jobId);
-                        setJobNotice(null);
-                      }
-                    },
-                  },
-                );
-              }}
-            >
-              {generateBatch.isPending
-                ? 'Starting…'
-                : paused
-                  ? 'Paused until you refresh'
-                  : `Generate episodes ${status.nextBatch.start}–${status.nextBatch.end}`}
-            </Button>
-          </CardContent>
-        </Card>
+      {(generateBatch.error || planEpisode.error) && (
+        <p className="text-destructive text-sm" role="alert">
+          {(generateBatch.error ?? planEpisode.error)?.message}
+        </p>
       )}
 
       {status.episodeCount > 0 && (

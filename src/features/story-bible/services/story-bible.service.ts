@@ -82,6 +82,12 @@ export const storyBibleService = {
   getStoryBoard: (projectId: string) =>
     apiGet<ApiResponse<StoryBoard>>(`${BASE(projectId)}/composer/stories`),
 
+  planEpisode: (projectId: string, episodeNumber: number) =>
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, { episodeNumber: number }>(
+      `${BASE(projectId)}/composer/plan-episode`,
+      { episodeNumber },
+    ),
+
   rememberSeasonSize: (projectId: string, totalEpisodes: number) =>
     apiPost<ApiResponse<ComposerStatus>, { totalEpisodes: number }>(
       `${BASE(projectId)}/composer/season-size`,

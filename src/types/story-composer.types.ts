@@ -31,6 +31,12 @@ export type EpisodeBatch = {
   status: EpisodeBatchStatus;
 };
 
+export type SeasonEpisodeRow = {
+  number: number;
+  title: string;
+  status: EpisodeBatchStatus;
+};
+
 export type ComposerStatus = {
   projectId: string;
   hasStoryOverview: boolean;
@@ -48,6 +54,7 @@ export type ComposerStatus = {
   nextStep: ComposerNextStep;
   nextBatch: ComposerBatchInfo | null;
   episodeBatches?: EpisodeBatch[];
+  seasonEpisodes?: SeasonEpisodeRow[];
   episodePlanPreview: EpisodePlanPreview[];
   overview: {
     logline: string;
@@ -107,6 +114,8 @@ export type GenerateEpisodeBatchPayload = {
   forceFinale?: boolean;
   /** Write scenes for every planned episode that does not have them yet. */
   generateAll?: boolean;
+  /** Write scenes for this one planned episode. */
+  episodeNumber?: number;
 };
 
 export type GenerateEpisodeBatchResult = {

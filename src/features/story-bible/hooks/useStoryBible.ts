@@ -137,6 +137,18 @@ export function useStoryBoard(projectId: string, options?: { poll?: boolean }) {
   });
 }
 
+export function usePlanEpisode(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (episodeNumber: number) =>
+      storyBibleService.planEpisode(projectId, episodeNumber).then((response) => response.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.jobs });
+    },
+  });
+}
+
 export function useRememberSeasonSize(projectId: string) {
   const queryClient = useQueryClient();
 
