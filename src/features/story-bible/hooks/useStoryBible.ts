@@ -248,14 +248,16 @@ export function useWatchEpisodeGenerateJob(projectId: string, jobId: string | nu
     enabled: !!projectId,
     refetchInterval: (query) => {
       const jobs = query.state.data ?? [];
+      const tracked = jobId ? jobs.find((item) => item.id === jobId) : undefined;
+      if (tracked?.status === 'completed' || tracked?.status === 'failed') return false;
+      if (jobId) return 2500;
       const hasActive = jobs.some(
         (item) =>
           item.projectId === projectId &&
           (item.status === 'queued' || item.status === 'running') &&
           (item.agentId === 'story-composer-generate' ||
             item.agentId === 'story-composer-sync' ||
-            item.agentId === 'story-composer-compose' ||
-            (jobId != null && item.id === jobId)),
+            item.agentId === 'story-composer-compose'),
       );
       return hasActive ? 2500 : false;
     },

@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { DeleteEpisodeDialog } from '@/features/episode-planner/components/DeleteEpisodeDialog';
-import { useGenerateEpisodeBatch } from '@/features/story-bible/hooks/useStoryBible';
+import {
+  useGenerateEpisodeBatch,
+  useWatchEpisodeGenerateJob,
+} from '@/features/story-bible/hooks/useStoryBible';
 import {
   EPISODE_STATUS_LABELS,
   formatRuntime,
@@ -104,6 +107,8 @@ type EpisodeListProps = {
 export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
   const generateScenes = useGenerateEpisodeBatch(projectId);
   const [startedEpisode, setStartedEpisode] = useState<number | null>(null);
+  const [sceneJobId, setSceneJobId] = useState<string | null>(null);
+  const sceneJob = useWatchEpisodeGenerateJob(projectId, sceneJobId);
 
   if (episodes.length === 0) {
     return (
@@ -120,10 +125,21 @@ export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
           {generateScenes.error.message}
         </p>
       ) : null}
-      {startedEpisode != null && !generateScenes.isPending ? (
+      {startedEpisode != null && sceneJob.isWatching ? (
         <p className="text-muted-foreground text-sm">
-          Scene generation for episode {startedEpisode} is running. Refresh this page when the
-          notification arrives.
+          Generating scenes for episode {startedEpisode}. This list updates when they are saved.
+        </p>
+      ) : null}
+      {startedEpisode != null && sceneJob.isComplete ? (
+        <p className="text-muted-foreground text-sm">
+          Scenes for episode {startedEpisode} are ready.
+        </p>
+      ) : null}
+      {startedEpisode != null && sceneJob.isFailed ? (
+        <p className="text-destructive text-sm" role="alert">
+          {sceneJob.job?.errorMessage ??
+            sceneJob.job?.message ??
+            `Scene generation failed for episode ${startedEpisode}.`}
         </p>
       ) : null}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -132,14 +148,17 @@ export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
             key={episode.id}
             episode={episode}
             projectId={projectId}
-            generatingScenes={generateScenes.isPending}
+            generatingScenes={generateScenes.isPending || sceneJob.isWatching}
             onGenerateScenes={
               episode.sceneCount === 0
                 ? () => {
                     generateScenes.mutate(
                       { count: 1, episodeNumber: episode.number },
                       {
-                        onSuccess: () => setStartedEpisode(episode.number),
+                        onSuccess: (data) => {
+                          setStartedEpisode(episode.number);
+                          if ('jobId' in data && data.jobId) setSceneJobId(data.jobId);
+                        },
                       },
                     );
                   }

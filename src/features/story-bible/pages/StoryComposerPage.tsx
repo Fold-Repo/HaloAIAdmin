@@ -161,6 +161,9 @@ export function StoryComposerPage() {
     void statusQuery.refetch();
     void storiesQuery.refetch();
     void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.notifications });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
   }, [jobsQuery.data, waitingJobId, projectId, queryClient, statusQuery, storiesQuery]);
 
   useEffect(() => {
