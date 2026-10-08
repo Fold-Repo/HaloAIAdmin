@@ -77,5 +77,7 @@ export function AuthenticatedImage({ src, alt, className }: AuthenticatedImagePr
     );
   }
 
-  return <img src={blobUrl} alt={alt} className={cn('rounded-lg border object-cover', className)} />;
+  return (
+    <img src={blobUrl} alt={alt} className={cn('rounded-lg border object-cover', className)} />
+  );
 }

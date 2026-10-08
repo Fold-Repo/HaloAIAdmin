@@ -23,6 +23,20 @@ export type ComposerBatchInfo = {
   isFinale: boolean;
 };
 
+export type EpisodeBatchStatus = 'scenes-ready' | 'outline-ready' | 'not-planned';
+
+export type EpisodeBatch = {
+  start: number;
+  end: number;
+  status: EpisodeBatchStatus;
+};
+
+export type SeasonEpisodeRow = {
+  number: number;
+  title: string;
+  status: EpisodeBatchStatus;
+};
+
 export type ComposerStatus = {
   projectId: string;
   hasStoryOverview: boolean;
@@ -39,6 +53,8 @@ export type ComposerStatus = {
   summarySyncedAt?: string;
   nextStep: ComposerNextStep;
   nextBatch: ComposerBatchInfo | null;
+  episodeBatches?: EpisodeBatch[];
+  seasonEpisodes?: SeasonEpisodeRow[];
   episodePlanPreview: EpisodePlanPreview[];
   overview: {
     logline: string;
@@ -53,8 +69,31 @@ export type ComposeStoryPayload = {
   episodeLengthSec?: number;
   seriesContext?: string;
   mode?: 'replace' | 'merge';
-  /** Episodes to generate right after planning (1–5). Default 1. */
+  /** Episodes to generate right after planning (1–5). Ignored — compose writes every episode in the background. */
   firstBatchCount?: number;
+};
+
+export type StoryBoardScene = {
+  id: string;
+  order: number;
+  title: string;
+  description: string;
+  location?: string;
+  durationSec: number;
+  characters: string[];
+};
+
+export type StoryBoardEpisode = {
+  id: string;
+  number: number;
+  title: string;
+  synopsis: string;
+  cliffhanger: string;
+  scenes: StoryBoardScene[];
+};
+
+export type StoryBoard = {
+  episodes: StoryBoardEpisode[];
 };
 
 export type ComposeStoryResult = {
@@ -73,6 +112,12 @@ export type ComposeStoryResult = {
 export type GenerateEpisodeBatchPayload = {
   count?: number;
   forceFinale?: boolean;
+  /** Write scenes for every planned episode that does not have them yet. */
+  generateAll?: boolean;
+  /** Write scenes for this one planned episode. */
+  episodeNumber?: number;
+  /** Write scenes for these planned episodes. */
+  episodeNumbers?: number[];
 };
 
 export type GenerateEpisodeBatchResult = {

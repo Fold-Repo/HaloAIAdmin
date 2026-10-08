@@ -18,8 +18,7 @@ export const renderingService = {
   getOverview: (projectId: string) =>
     apiGet<ApiResponse<RenderingOverview>>(`${BASE(projectId)}/overview`),
 
-  getQueue: (projectId: string) =>
-    apiGet<ApiResponse<RenderJob[]>>(`${BASE(projectId)}/queue`),
+  getQueue: (projectId: string) => apiGet<ApiResponse<RenderJob[]>>(`${BASE(projectId)}/queue`),
 
   getRetryQueue: (projectId: string) =>
     apiGet<ApiResponse<RenderJob[]>>(`${BASE(projectId)}/retry-queue`),
@@ -27,29 +26,21 @@ export const renderingService = {
   getWorkers: (projectId: string) =>
     apiGet<ApiResponse<RenderWorker[]>>(`${BASE(projectId)}/workers`),
 
-  getGpus: (projectId: string) =>
-    apiGet<ApiResponse<GpuNode[]>>(`${BASE(projectId)}/gpu`),
+  getGpus: (projectId: string) => apiGet<ApiResponse<GpuNode[]>>(`${BASE(projectId)}/gpu`),
 
   getFfmpegJobs: (projectId: string) =>
     apiGet<ApiResponse<FfmpegJobDetail[]>>(`${BASE(projectId)}/ffmpeg`),
 
-  getHistory: (projectId: string) =>
-    apiGet<ApiResponse<RenderJob[]>>(`${BASE(projectId)}/history`),
+  getHistory: (projectId: string) => apiGet<ApiResponse<RenderJob[]>>(`${BASE(projectId)}/history`),
 
   getMonitoring: (projectId: string) =>
     apiGet<ApiResponse<QueueMetrics>>(`${BASE(projectId)}/monitoring`),
 
   retryJob: (projectId: string, payload: RetryJobPayload) =>
-    apiPost<ApiResponse<JobActionResult>, RetryJobPayload>(
-      `${BASE(projectId)}/retry`,
-      payload,
-    ),
+    apiPost<ApiResponse<JobActionResult>, RetryJobPayload>(`${BASE(projectId)}/retry`, payload),
 
   cancelJob: (projectId: string, payload: CancelJobPayload) =>
-    apiPost<ApiResponse<JobActionResult>, CancelJobPayload>(
-      `${BASE(projectId)}/cancel`,
-      payload,
-    ),
+    apiPost<ApiResponse<JobActionResult>, CancelJobPayload>(`${BASE(projectId)}/cancel`, payload),
 
   getJob: (projectId: string, jobId: string) =>
     apiGet<ApiResponse<RenderJob>>(`${BASE(projectId)}/jobs/${jobId}`),

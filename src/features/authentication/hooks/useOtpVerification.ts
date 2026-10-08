@@ -22,8 +22,7 @@ export function useOtpVerification({ email, purpose }: UseOtpVerificationOptions
   const [verifiedCode, setVerifiedCode] = useState('');
 
   const verifyMutation = useMutation({
-    mutationFn: (code: string) =>
-      authService.verifyOtp({ email, code, purpose }),
+    mutationFn: (code: string) => authService.verifyOtp({ email, code, purpose }),
     onSuccess: (response, code) => {
       if ('tokens' in response.data) {
         const session = response.data as AuthSession;

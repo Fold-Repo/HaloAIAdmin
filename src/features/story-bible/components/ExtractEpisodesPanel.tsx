@@ -109,7 +109,9 @@ export function ExtractEpisodesPanel({ projectId, content }: ExtractEpisodesPane
                         </Badge>
                       </div>
                       {episode.synopsis && (
-                        <p className="text-muted-foreground mt-1 line-clamp-2">{episode.synopsis}</p>
+                        <p className="text-muted-foreground mt-1 line-clamp-2">
+                          {episode.synopsis}
+                        </p>
                       )}
                       {episode.scenes.length > 0 && (
                         <ul className="text-muted-foreground mt-2 space-y-1 pl-5 text-xs">
@@ -131,8 +133,8 @@ export function ExtractEpisodesPanel({ projectId, content }: ExtractEpisodesPane
         {extractMutation.data && (
           <p className="text-muted-foreground text-sm">
             Created {extractMutation.data.episodesCreated} episodes, updated{' '}
-            {extractMutation.data.episodesUpdated}, added {extractMutation.data.scenesCreated} scenes.
-            Open Episode Planner to edit and reorder scenes.
+            {extractMutation.data.episodesUpdated}, added {extractMutation.data.scenesCreated}{' '}
+            scenes. Open Episode Planner to edit and reorder scenes.
           </p>
         )}
       </CardContent>

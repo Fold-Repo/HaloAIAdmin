@@ -1,21 +1,8 @@
 export type RenderingSection =
-  | 'progress'
-  | 'queue'
-  | 'workers'
-  | 'retry'
-  | 'gpu'
-  | 'ffmpeg'
-  | 'history'
-  | 'monitoring';
+  'progress' | 'queue' | 'workers' | 'retry' | 'gpu' | 'ffmpeg' | 'history' | 'monitoring';
 
 export type RenderJobStatus =
-  | 'pending'
-  | 'queued'
-  | 'processing'
-  | 'encoding'
-  | 'completed'
-  | 'failed'
-  | 'retrying';
+  'pending' | 'queued' | 'processing' | 'encoding' | 'completed' | 'failed' | 'retrying';
 
 export type QueueHealth = 'healthy' | 'degraded' | 'critical';
 

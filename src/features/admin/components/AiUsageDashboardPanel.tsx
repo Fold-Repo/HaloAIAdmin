@@ -38,10 +38,7 @@ export function AiUsageDashboardPanel({ metrics }: { metrics: AiUsageMetrics }) 
           <CardTitle className="text-base">Daily AI spend</CardTitle>
         </CardHeader>
         <CardContent>
-          <MetricLineChart
-            data={metrics.series}
-            valueFormatter={(value) => formatUsd(value)}
-          />
+          <MetricLineChart data={metrics.series} valueFormatter={(value) => formatUsd(value)} />
         </CardContent>
       </Card>
 
@@ -51,7 +48,10 @@ export function AiUsageDashboardPanel({ metrics }: { metrics: AiUsageMetrics }) 
         </CardHeader>
         <CardContent className="space-y-3">
           {metrics.byAgent.map((agent) => (
-            <div key={agent.agent} className="flex items-center justify-between rounded-lg border p-3">
+            <div
+              key={agent.agent}
+              className="flex items-center justify-between rounded-lg border p-3"
+            >
               <div>
                 <p className="font-medium">{agent.agent}</p>
                 <p className="text-muted-foreground text-xs">

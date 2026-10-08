@@ -14,9 +14,7 @@ import {
 describe('ai generation utils', () => {
   it('builds ai generation paths', () => {
     expect(getAiGenerationPath('proj-1')).toBe('/studio/projects/proj-1/ai/dashboard');
-    expect(getAiGenerationPath('proj-1', 'script')).toBe(
-      '/studio/projects/proj-1/ai/script',
-    );
+    expect(getAiGenerationPath('proj-1', 'script')).toBe('/studio/projects/proj-1/ai/script');
   });
 
   it('validates section ids', () => {

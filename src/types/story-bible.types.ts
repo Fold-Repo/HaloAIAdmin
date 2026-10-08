@@ -15,13 +15,7 @@ export type StoryBibleSection =
 
 export type CharacterRole = 'protagonist' | 'antagonist' | 'supporting' | 'minor';
 
-export type RelationshipType =
-  | 'ally'
-  | 'rival'
-  | 'family'
-  | 'romantic'
-  | 'mentor'
-  | 'enemy';
+export type RelationshipType = 'ally' | 'rival' | 'family' | 'romantic' | 'mentor' | 'enemy';
 
 export type StoryOverview = {
   projectId: string;

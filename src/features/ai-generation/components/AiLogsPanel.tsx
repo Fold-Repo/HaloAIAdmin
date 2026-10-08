@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatRelativeDate } from '@/features/creator/utils/creator.utils';
 import type { AiLogEntry } from '@/types';
 
-const LEVEL_VARIANTS: Record<AiLogEntry['level'], 'secondary' | 'success' | 'warning' | 'destructive'> = {
+const LEVEL_VARIANTS: Record<
+  AiLogEntry['level'],
+  'secondary' | 'success' | 'warning' | 'destructive'
+> = {
   info: 'secondary',
   success: 'success',
   warning: 'warning',

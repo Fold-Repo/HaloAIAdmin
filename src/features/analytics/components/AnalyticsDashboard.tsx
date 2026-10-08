@@ -11,13 +11,41 @@ import type { AnalyticsOverview } from '@/types';
 
 export function AnalyticsDashboard({ overview }: { overview: AnalyticsOverview }) {
   const cards = [
-    { label: 'Total views', value: formatNumber(overview.totalViews), change: overview.viewsChangePct },
-    { label: 'Revenue', value: formatUsd(overview.totalRevenueUsd), change: overview.revenueChangePct },
-    { label: 'Watch time', value: formatHours(overview.totalWatchTimeHours), change: overview.watchTimeChangePct ?? 0 },
-    { label: 'Completion rate', value: formatPercent(overview.avgCompletionRate), change: overview.completionChangePct ?? 0 },
-    { label: 'AI cost', value: formatUsd(overview.totalAiCostUsd), change: overview.aiCostChangePct ?? 0 },
-    { label: 'Render cost', value: formatUsd(overview.totalRenderCostUsd), change: overview.renderCostChangePct ?? 0 },
-    { label: 'Active users', value: formatNumber(overview.activeUsers), change: overview.activeUsersChangePct ?? 0 },
+    {
+      label: 'Total views',
+      value: formatNumber(overview.totalViews),
+      change: overview.viewsChangePct,
+    },
+    {
+      label: 'Revenue',
+      value: formatUsd(overview.totalRevenueUsd),
+      change: overview.revenueChangePct,
+    },
+    {
+      label: 'Watch time',
+      value: formatHours(overview.totalWatchTimeHours),
+      change: overview.watchTimeChangePct ?? 0,
+    },
+    {
+      label: 'Completion rate',
+      value: formatPercent(overview.avgCompletionRate),
+      change: overview.completionChangePct ?? 0,
+    },
+    {
+      label: 'AI cost',
+      value: formatUsd(overview.totalAiCostUsd),
+      change: overview.aiCostChangePct ?? 0,
+    },
+    {
+      label: 'Render cost',
+      value: formatUsd(overview.totalRenderCostUsd),
+      change: overview.renderCostChangePct ?? 0,
+    },
+    {
+      label: 'Active users',
+      value: formatNumber(overview.activeUsers),
+      change: overview.activeUsersChangePct ?? 0,
+    },
   ];
 
   return (

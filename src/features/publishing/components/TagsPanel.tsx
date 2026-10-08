@@ -60,7 +60,7 @@ export function TagsPanel({ projectId, settings }: TagsPanelProps) {
         <div className="flex flex-wrap gap-2">
           {settings.tags.map((tag) => (
             <button key={tag} type="button" onClick={() => removeTag(tag)}>
-              <Badge variant="outline" className="cursor-pointer hover:bg-accent">
+              <Badge variant="outline" className="hover:bg-accent cursor-pointer">
                 {tag} ×
               </Badge>
             </button>

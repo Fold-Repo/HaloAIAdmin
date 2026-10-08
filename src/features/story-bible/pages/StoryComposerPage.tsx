@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { BookOpen, Clapperboard, Film, RefreshCw, Sparkles, Video } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,19 +11,38 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingScreen } from '@/components/common';
+import { QUERY_KEYS } from '@/constants';
+import { creatorService } from '@/features/creator/services/creator.service';
 import { useProject } from '@/features/creator/hooks/useCreatorQueries';
 import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
 import { getAiGenerationPath } from '@/features/ai-generation/utils/ai-generation.utils';
+import { FullStoryBoard } from '@/features/story-bible/components/FullStoryBoard';
 import {
   useComposeStory,
   useComposerStatus,
   useExpandEpisodes,
   useGenerateEpisodeBatch,
+  usePlanEpisode,
+  useRememberSeasonSize,
+  useStoryBoard,
   useSyncStorySummary,
-  useWatchEpisodeGenerateJob,
 } from '@/features/story-bible/hooks/useStoryBible';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
-import type { ComposerNextStep, GenerateEpisodeBatchAccepted } from '@/types';
+import type { AiJob, ComposerNextStep } from '@/types';
+
+const COMPOSER_JOB_AGENTS = new Set([
+  'story-composer-compose',
+  'story-composer-generate',
+  'story-composer-sync',
+]);
+
+function isActiveComposerJob(job: AiJob, projectId: string) {
+  return (
+    job.projectId === projectId &&
+    COMPOSER_JOB_AGENTS.has(job.agentId ?? '') &&
+    (job.status === 'queued' || job.status === 'running')
+  );
+}
 
 const STEP_LABELS: Record<ComposerNextStep, string> = {
   compose: 'Plan full story',
@@ -54,38 +74,108 @@ export function StoryComposerPage() {
   const location = useLocation();
   const navState = (location.state ?? {}) as ComposerLocationState;
 
+  const queryClient = useQueryClient();
+  const [waitingJobId, setWaitingJobId] = useState<string | null>(null);
+  const [jobNotice, setJobNotice] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const jobsQuery = useQuery({
+    queryKey: [...QUERY_KEYS.creator.jobs, 'composer-snapshot', projectId],
+    queryFn: () => creatorService.getAiJobs().then((response) => response.data),
+    enabled: !!projectId,
+    refetchInterval: (query) => {
+      if (waitingJobId) return 4000;
+      const jobs = query.state.data ?? [];
+      return jobs.some((job) => isActiveComposerJob(job, projectId)) ? 4000 : false;
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const projectQuery = useProject(projectId);
   const statusQuery = useComposerStatus(projectId);
+  const storiesQuery = useStoryBoard(projectId);
   const composeStory = useComposeStory(projectId);
   const generateBatch = useGenerateEpisodeBatch(projectId);
+  const planEpisode = usePlanEpisode(projectId);
+  const rememberSeasonSize = useRememberSeasonSize(projectId);
   const expandEpisodes = useExpandEpisodes(projectId);
   const syncSummary = useSyncStorySummary(projectId);
 
   const [premise, setPremise] = useState('');
   const [episodeCount, setEpisodeCount] = useState(3);
-  const [firstBatchCount, setFirstBatchCount] = useState(1);
-  const [batchCount, setBatchCount] = useState(1);
+  const [seasonSize, setSeasonSize] = useState(3);
   const [expandCount, setExpandCount] = useState(1);
   const [expandDirection, setExpandDirection] = useState('');
   const [expandFinale, setExpandFinale] = useState(false);
   const [autoComposeAttempted, setAutoComposeAttempted] = useState(false);
-  const [activeGenerateJobId, setActiveGenerateJobId] = useState<string | null>(null);
+  const settledJobIds = useRef(new Set<string>());
+  const watchedJobId = useRef<string | null>(null);
 
   const project = projectQuery.data;
   const status = statusQuery.data;
-  const generateWatch = useWatchEpisodeGenerateJob(projectId, activeGenerateJobId);
+  const runningJob = jobsQuery.data?.find((job) => isActiveComposerJob(job, projectId));
+  const paused = Boolean(waitingJobId || runningJob);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const [jobsResult] = await Promise.all([
+        jobsQuery.refetch(),
+        statusQuery.refetch(),
+        storiesQuery.refetch(),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.notifications }),
+      ]);
+      const jobs = jobsResult.data ?? [];
+      const stillRunning = jobs.some((job) => isActiveComposerJob(job, projectId));
+      const tracked = waitingJobId ? jobs.find((job) => job.id === waitingJobId) : undefined;
+      if (!stillRunning) {
+        setWaitingJobId(null);
+        if (tracked?.status === 'failed') {
+          setJobNotice(tracked.errorMessage ?? tracked.message ?? 'Story generation failed.');
+        } else if (tracked?.status === 'completed') {
+          setJobNotice(tracked.message ?? 'Story generation finished.');
+        }
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    if (generateWatch.activeJobId && generateWatch.activeJobId !== activeGenerateJobId) {
-      setActiveGenerateJobId(generateWatch.activeJobId);
-    }
-  }, [generateWatch.activeJobId, activeGenerateJobId]);
+    const jobs = jobsQuery.data ?? [];
+    const active = jobs.find((job) => isActiveComposerJob(job, projectId));
+    if (active) watchedJobId.current = active.id;
+    const targetId = waitingJobId ?? watchedJobId.current;
+    if (!targetId) return;
+    const job = jobs.find((item) => item.id === targetId);
+    if (!job || (job.status !== 'completed' && job.status !== 'failed')) return;
+    if (settledJobIds.current.has(job.id)) return;
+    settledJobIds.current.add(job.id);
+    watchedJobId.current = null;
+    setWaitingJobId(null);
+    setJobNotice(
+      job.status === 'failed'
+        ? (job.errorMessage ?? job.message ?? 'Story plan failed.')
+        : (job.message ?? 'Story plan ready.'),
+    );
+    void statusQuery.refetch();
+    void storiesQuery.refetch();
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.notifications });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
+    void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+  }, [jobsQuery.data, waitingJobId, projectId, queryClient, statusQuery, storiesQuery]);
 
   useEffect(() => {
     if (!project) return;
     setPremise(navState.premise ?? project.prompt ?? '');
     setEpisodeCount(navState.episodeCount ?? 3);
   }, [project, navState.premise, navState.episodeCount]);
+
+  useEffect(() => {
+    if (!status?.plannedEpisodeCount) return;
+    setSeasonSize(status.plannedEpisodeCount);
+  }, [status?.plannedEpisodeCount]);
 
   useEffect(() => {
     if (
@@ -101,21 +191,22 @@ export function StoryComposerPage() {
     if (!premise.trim()) return;
 
     setAutoComposeAttempted(true);
-    composeStory.mutate({
-      premise: premise.trim(),
-      episodeCount,
-      mode: 'replace',
-      firstBatchCount,
-    });
-  }, [
-    navState.autoCompose,
-    autoComposeAttempted,
-    status,
-    premise,
-    episodeCount,
-    firstBatchCount,
-    composeStory,
-  ]);
+    composeStory.mutate(
+      {
+        premise: premise.trim(),
+        episodeCount,
+        mode: 'replace',
+      },
+      {
+        onSuccess: (data) => {
+          if (data.jobId) {
+            setWaitingJobId(data.jobId);
+            setJobNotice(null);
+          }
+        },
+      },
+    );
+  }, [navState.autoCompose, autoComposeAttempted, status, premise, episodeCount, composeStory]);
 
   if (projectQuery.isLoading || statusQuery.isLoading) {
     return <LoadingScreen message="Loading story composer..." />;
@@ -141,12 +232,21 @@ export function StoryComposerPage() {
   const targetRuntimeSec = Math.max(100, project.episodeLength);
 
   const handleCompose = () => {
-    composeStory.mutate({
-      premise: premise.trim(),
-      episodeCount,
-      mode: status.episodeCount > 0 ? 'merge' : 'replace',
-      firstBatchCount,
-    });
+    composeStory.mutate(
+      {
+        premise: premise.trim(),
+        episodeCount: Math.min(50, Math.max(1, episodeCount)),
+        mode: status.episodeCount > 0 ? 'merge' : 'replace',
+      },
+      {
+        onSuccess: (data) => {
+          if (data.jobId) {
+            setWaitingJobId(data.jobId);
+            setJobNotice(null);
+          }
+        },
+      },
+    );
   };
 
   return (
@@ -157,9 +257,10 @@ export function StoryComposerPage() {
           <Badge variant="secondary">{project.title}</Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Claude plans the full season in the story bible first (beginning to ending). Episode
-          scenes generate in settable batches (default 1 — safer behind Cloudflare). Each episode
-          targets at least 1:40 ({targetRuntimeSec}s) with 7+ scenes before video generation.
+          A new AI project writes the story plan for up to 50 episodes and stops there. Generate
+          scenes on that episode. Video opens when an episode’s scenes are ready. The page stays
+          paused until you refresh. Each episode targets at least 1:40 ({targetRuntimeSec}s) with 7+
+          scenes.
         </p>
       </div>
 
@@ -204,6 +305,28 @@ export function StoryComposerPage() {
         </CardContent>
       </Card>
 
+      {paused ? (
+        <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm">
+          <p>
+            The story plan is running in the background, eight episodes at a time. This page stays
+            paused and checks the job every few seconds.
+            {runningJob?.message
+              ? ` ${runningJob.message}`
+              : ' The plan loads here when that job finishes.'}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={refreshing}
+            onClick={() => void handleRefresh()}
+          >
+            <RefreshCw className="size-4" />
+            {refreshing ? 'Refreshing…' : 'Refresh stories'}
+          </Button>
+        </div>
+      ) : null}
+      {jobNotice ? <p className="text-sm">{jobNotice}</p> : null}
+
       {(status.nextStep === 'compose' || composeStory.isPending) && (
         <Card>
           <CardHeader>
@@ -219,39 +342,28 @@ export function StoryComposerPage() {
                 id="premise"
                 rows={6}
                 value={premise}
+                disabled={paused}
                 onChange={(event) => setPremise(event.target.value)}
                 placeholder="Describe characters, conflict, tone, and where the story should go..."
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="episodeCount">Total episodes in season</Label>
                 <Input
                   id="episodeCount"
                   type="number"
                   min={1}
-                  max={30}
+                  max={50}
+                  disabled={paused}
                   value={episodeCount}
-                  onChange={(event) => setEpisodeCount(Number(event.target.value))}
-                />
-                <p className="text-muted-foreground text-xs">
-                  Full plot is planned for all episodes up front.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="firstBatchCount">First batch size</Label>
-                <Input
-                  id="firstBatchCount"
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={firstBatchCount}
                   onChange={(event) =>
-                    setFirstBatchCount(Math.min(5, Math.max(1, Number(event.target.value) || 1)))
+                    setEpisodeCount(Math.min(50, Math.max(1, Number(event.target.value) || 1)))
                   }
                 />
                 <p className="text-muted-foreground text-xs">
-                  Use 1 on staging to avoid timeouts / wasted Claude calls.
+                  Up to 50. This writes the story plan only. Generate scenes afterward, one episode
+                  at a time.
                 </p>
               </div>
               <div className="space-y-2">
@@ -265,12 +377,14 @@ export function StoryComposerPage() {
               </p>
             )}
             <Button
-              disabled={composeStory.isPending || premise.trim().length < 10}
+              disabled={composeStory.isPending || paused || premise.trim().length < 10}
               onClick={handleCompose}
             >
               {composeStory.isPending
-                ? 'Planning story & generating first batch...'
-                : 'Plan full story & generate first batch'}
+                ? 'Starting…'
+                : paused
+                  ? 'Paused until you refresh'
+                  : 'Create story plan'}
             </Button>
           </CardContent>
         </Card>
@@ -313,6 +427,111 @@ export function StoryComposerPage() {
         </Card>
       )}
 
+      {status.hasStoryOverview && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Episodes</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <p className="text-muted-foreground">
+              The story plan is already written. If an episode has no scenes, use Generate scenes on
+              that episode only.
+            </p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="seasonSize">Season episodes</Label>
+                <Input
+                  id="seasonSize"
+                  type="number"
+                  min={1}
+                  max={50}
+                  className="w-28"
+                  value={seasonSize}
+                  disabled={paused}
+                  onChange={(event) =>
+                    setSeasonSize(Math.min(50, Math.max(1, Number(event.target.value) || 1)))
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={paused || rememberSeasonSize.isPending}
+                onClick={() => rememberSeasonSize.mutate(seasonSize)}
+              >
+                {rememberSeasonSize.isPending ? 'Saving…' : 'Remember season size'}
+              </Button>
+            </div>
+            {(status.seasonEpisodes?.length ?? 0) > 0 && (
+              <ul className="space-y-2">
+                {status.seasonEpisodes?.map((episode) => {
+                  const nextToPlan = status.seasonEpisodes?.find(
+                    (item) => item.status === 'not-planned',
+                  )?.number;
+                  return (
+                    <li key={episode.number} className="flex flex-wrap items-center gap-2">
+                      <Badge variant={episode.status === 'scenes-ready' ? 'secondary' : 'outline'}>
+                        Ep {episode.number}
+                      </Badge>
+                      <span className="min-w-0 flex-1 text-sm">{episode.title}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {episode.status === 'scenes-ready'
+                          ? 'scenes ready'
+                          : episode.status === 'outline-ready'
+                            ? 'plan ready, no scenes'
+                            : 'no story plan'}
+                      </span>
+                      {episode.status === 'not-planned' && episode.number === nextToPlan && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={paused || planEpisode.isPending}
+                          onClick={() => {
+                            planEpisode.mutate(episode.number, {
+                              onSuccess: (data) => {
+                                if (data.jobId) {
+                                  setWaitingJobId(data.jobId);
+                                  setJobNotice(null);
+                                }
+                              },
+                            });
+                          }}
+                        >
+                          Create story plan
+                        </Button>
+                      )}
+                      {episode.status === 'outline-ready' && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={paused || generateBatch.isPending}
+                          onClick={() => {
+                            generateBatch.mutate(
+                              { count: 1, episodeNumber: episode.number },
+                              {
+                                onSuccess: (data) => {
+                                  if ('jobId' in data && data.jobId) {
+                                    setWaitingJobId(data.jobId);
+                                    setJobNotice(null);
+                                  }
+                                },
+                              },
+                            );
+                          }}
+                        >
+                          Generate scenes
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {status.hasEpisodePlan && status.episodePlanPreview.length > 0 && (
         <Card>
           <CardHeader>
@@ -320,7 +539,8 @@ export function StoryComposerPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="text-muted-foreground">
-              The full plot is in the story bible. Review before generating more scenes or video.
+              The full plot is in the story bible. Episodes with a plan and no scenes can generate
+              scenes from here.
             </p>
             <ul className="space-y-1">
               {status.episodePlanPreview.map((entry) => (
@@ -330,8 +550,29 @@ export function StoryComposerPage() {
                   </Badge>
                   <span>{entry.title}</span>
                   <span className="text-muted-foreground text-xs">({entry.actPhase})</span>
-                  {entry.generated && (
+                  {entry.generated ? (
                     <span className="text-muted-foreground text-xs">scenes ready</span>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={paused || generateBatch.isPending}
+                      onClick={() => {
+                        generateBatch.mutate(
+                          { count: 1, episodeNumber: entry.number },
+                          {
+                            onSuccess: (data) => {
+                              if ('jobId' in data && data.jobId) {
+                                setWaitingJobId(data.jobId);
+                                setJobNotice(null);
+                              }
+                            },
+                          },
+                        );
+                      }}
+                    >
+                      Generate scenes
+                    </Button>
                   )}
                 </li>
               ))}
@@ -345,81 +586,14 @@ export function StoryComposerPage() {
         </Card>
       )}
 
-      {status.pendingEpisodeCount > 0 && status.nextBatch && (
-        <Card className="border-primary/30">
-          <CardHeader>
-            <CardTitle className="text-base">Generate next episode batch</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-              Next up from the plan: episode{status.nextBatch.size > 1 ? 's' : ''}{' '}
-              {status.nextBatch.start}
-              {status.nextBatch.size > 1 ? `–${status.nextBatch.end}` : ''}
-              {status.nextBatch.isFinale ? ' (season finale)' : ''}. Each episode gets 7+ scenes
-              totaling at least 1:40.
-            </p>
-            <div className="max-w-xs space-y-2">
-              <Label htmlFor="batchCount">Episodes this call (1–5)</Label>
-              <Input
-                id="batchCount"
-                type="number"
-                min={1}
-                max={5}
-                value={batchCount}
-                onChange={(event) =>
-                  setBatchCount(Math.min(5, Math.max(1, Number(event.target.value) || 1)))
-                }
-              />
-              <p className="text-muted-foreground text-xs">
-                Prefer 1 behind Cloudflare (~100s limit). Larger batches risk a 524 after Claude
-                already ran.
-              </p>
-            </div>
-            {generateWatch.isWatching ? (
-              <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
-                Episode job in progress
-                {generateWatch.job?.message ? `: ${generateWatch.job.message}` : ''}. Wait until it
-                finishes — another generate cannot be started.
-              </p>
-            ) : null}
-            {generateBatch.error && (
-              <p className="text-destructive text-sm" role="alert">
-                {generateBatch.error.message}
-              </p>
-            )}
-            {!generateWatch.isWatching &&
-            (generateBatch.data as GenerateEpisodeBatchAccepted | undefined)?.message ? (
-              <p className="text-muted-foreground text-xs">
-                {(generateBatch.data as GenerateEpisodeBatchAccepted).message}
-              </p>
-            ) : null}
-            <Button
-              disabled={generateBatch.isPending || generateWatch.isWatching}
-              onClick={() => {
-                if (generateWatch.isWatching) return;
-                generateBatch.mutate(
-                  {
-                    count: batchCount,
-                    forceFinale: status.nextBatch?.isFinale,
-                  },
-                  {
-                    onSuccess: (data) => {
-                      if ('jobId' in data && data.jobId) {
-                        setActiveGenerateJobId(data.jobId);
-                      }
-                    },
-                  },
-                );
-              }}
-            >
-              {generateBatch.isPending
-                ? 'Starting…'
-                : generateWatch.isWatching
-                  ? 'Job running — wait…'
-                  : `Generate ${batchCount} episode${batchCount === 1 ? '' : 's'}`}
-            </Button>
-          </CardContent>
-        </Card>
+      {storiesQuery.data && storiesQuery.data.episodes.length > 0 && (
+        <FullStoryBoard stories={storiesQuery.data} generating={false} />
+      )}
+
+      {(generateBatch.error || planEpisode.error) && (
+        <p className="text-destructive text-sm" role="alert">
+          {(generateBatch.error ?? planEpisode.error)?.message}
+        </p>
       )}
 
       {status.episodeCount > 0 && (
@@ -469,7 +643,11 @@ export function StoryComposerPage() {
               Video generation unlocked
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              {status.scenesReady} scene{status.scenesReady === 1 ? '' : 's'} can go to video now.
+              Other episodes can stay as a plan until you generate their scenes.
+            </p>
             <Button asChild>
               <Link to={getAiGenerationPath(projectId, 'video')}>
                 <Film className="size-4" />
@@ -528,7 +706,7 @@ export function StoryComposerPage() {
             )}
             <Button
               variant="secondary"
-              disabled={expandEpisodes.isPending}
+              disabled={expandEpisodes.isPending || paused}
               onClick={() =>
                 expandEpisodes.mutate({
                   count: expandCount,

@@ -15,7 +15,10 @@ export function FeatureFlagsPanel({ flags }: { flags: FeatureFlag[] }) {
       </CardHeader>
       <CardContent className="space-y-3">
         {flags.map((flag) => (
-          <div key={flag.id} className="flex items-start justify-between gap-4 rounded-lg border p-4">
+          <div
+            key={flag.id}
+            className="flex items-start justify-between gap-4 rounded-lg border p-4"
+          >
             <div className="flex items-start gap-3">
               <Checkbox
                 id={flag.id}

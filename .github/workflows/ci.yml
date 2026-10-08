@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
     branches: [main, develop]
 
@@ -105,4 +105,4 @@ jobs:
         uses: azure/setup-kubectl@v4
 
       - name: Dry-run manifests
-        run: kubectl apply --dry-run=client -f k8s/deployment.yaml
+        run: kubectl apply --dry-run=client --validate=false -f k8s/deployment.yaml

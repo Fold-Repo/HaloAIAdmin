@@ -11,9 +11,7 @@ for (const { path, name } of pages) {
   test(`${name} page has no critical accessibility violations`, async ({ page }) => {
     await page.goto(path);
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
 
     const serious = results.violations.filter(
       (violation) => violation.impact === 'serious' || violation.impact === 'critical',

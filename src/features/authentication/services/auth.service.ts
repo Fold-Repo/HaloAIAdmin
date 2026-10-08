@@ -33,10 +33,7 @@ export const authService = {
     apiPost<ApiResponse<{ email: string }>>(`${AUTH_BASE}/forgot-password`, payload),
 
   verifyOtp: (payload: OtpVerificationPayload) =>
-    apiPost<ApiResponse<AuthSession | { verified: true }>>(
-      `${AUTH_BASE}/verify-otp`,
-      payload,
-    ),
+    apiPost<ApiResponse<AuthSession | { verified: true }>>(`${AUTH_BASE}/verify-otp`, payload),
 
   resendOtp: (payload: { email: string; purpose: OtpPurpose }) =>
     apiPost<ApiResponse<null>>(`${AUTH_BASE}/resend-otp`, payload),

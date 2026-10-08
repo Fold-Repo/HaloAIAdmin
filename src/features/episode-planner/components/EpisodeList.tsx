@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Film } from 'lucide-react';
 
@@ -14,6 +15,10 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { DeleteEpisodeDialog } from '@/features/episode-planner/components/DeleteEpisodeDialog';
 import {
+  useGenerateEpisodeBatch,
+  useWatchEpisodeGenerateJob,
+} from '@/features/story-bible/hooks/useStoryBible';
+import {
   EPISODE_STATUS_LABELS,
   formatRuntime,
   getEpisodeDetailPath,
@@ -23,9 +28,16 @@ import type { Episode } from '@/types';
 type EpisodeCardProps = {
   episode: Episode;
   projectId: string;
+  generatingScenes?: boolean;
+  onGenerateScenes?: () => void;
 };
 
-export function EpisodeCard({ episode, projectId }: EpisodeCardProps) {
+export function EpisodeCard({
+  episode,
+  projectId,
+  generatingScenes = false,
+  onGenerateScenes,
+}: EpisodeCardProps) {
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader>
@@ -64,7 +76,18 @@ export function EpisodeCard({ episode, projectId }: EpisodeCardProps) {
           <strong>Cliffhanger:</strong> {episode.cliffhanger}
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
+        {episode.sceneCount === 0 && onGenerateScenes ? (
+          <Button
+            type="button"
+            size="sm"
+            className="w-full"
+            disabled={generatingScenes}
+            onClick={onGenerateScenes}
+          >
+            {generatingScenes ? 'Starting…' : 'Generate scenes'}
+          </Button>
+        ) : null}
         <Button asChild variant="outline" size="sm" className="w-full">
           <Link to={getEpisodeDetailPath(projectId, episode.id)}>
             <Film className="size-4" />
@@ -82,6 +105,11 @@ type EpisodeListProps = {
 };
 
 export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
+  const generateScenes = useGenerateEpisodeBatch(projectId);
+  const [startedEpisode, setStartedEpisode] = useState<number | null>(null);
+  const [sceneJobId, setSceneJobId] = useState<string | null>(null);
+  const sceneJob = useWatchEpisodeGenerateJob(projectId, sceneJobId);
+
   if (episodes.length === 0) {
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed px-6 py-16 text-center text-sm">
@@ -91,10 +119,54 @@ export function EpisodeList({ episodes, projectId }: EpisodeListProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {episodes.map((episode) => (
-        <EpisodeCard key={episode.id} episode={episode} projectId={projectId} />
-      ))}
+    <div className="space-y-3">
+      {generateScenes.error ? (
+        <p className="text-destructive text-sm" role="alert">
+          {generateScenes.error.message}
+        </p>
+      ) : null}
+      {startedEpisode != null && sceneJob.isWatching ? (
+        <p className="text-muted-foreground text-sm">
+          Generating scenes for episode {startedEpisode}. This list updates when they are saved.
+        </p>
+      ) : null}
+      {startedEpisode != null && sceneJob.isComplete ? (
+        <p className="text-muted-foreground text-sm">
+          Scenes for episode {startedEpisode} are ready.
+        </p>
+      ) : null}
+      {startedEpisode != null && sceneJob.isFailed ? (
+        <p className="text-destructive text-sm" role="alert">
+          {sceneJob.job?.errorMessage ??
+            sceneJob.job?.message ??
+            `Scene generation failed for episode ${startedEpisode}.`}
+        </p>
+      ) : null}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {episodes.map((episode) => (
+          <EpisodeCard
+            key={episode.id}
+            episode={episode}
+            projectId={projectId}
+            generatingScenes={generateScenes.isPending || sceneJob.isWatching}
+            onGenerateScenes={
+              episode.sceneCount === 0
+                ? () => {
+                    generateScenes.mutate(
+                      { count: 1, episodeNumber: episode.number },
+                      {
+                        onSuccess: (data) => {
+                          setStartedEpisode(episode.number);
+                          if ('jobId' in data && data.jobId) setSceneJobId(data.jobId);
+                        },
+                      },
+                    );
+                  }
+                : undefined
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 }

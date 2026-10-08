@@ -3,7 +3,6 @@ import { aiRequestConfig } from '@/api/request-timeouts';
 import type {
   ApiResponse,
   ComposeStoryPayload,
-  ComposeStoryResult,
   ComposerStatus,
   ExpandEpisodesPayload,
   ExpandEpisodesResult,
@@ -16,6 +15,7 @@ import type {
   StoryDocument,
   SyncEpisodeCountPayload,
   SyncEpisodeCountResult,
+  StoryBoard,
   SyncStorySummaryResult,
   UpdateStoryDocumentPayload,
   UpdateStoryEndingPayload,
@@ -74,10 +74,24 @@ export const storyBibleService = {
     apiGet<ApiResponse<ComposerStatus>>(`${BASE(projectId)}/composer/status`),
 
   composeStory: (projectId: string, payload: ComposeStoryPayload) =>
-    apiPost<ApiResponse<ComposeStoryResult>, ComposeStoryPayload>(
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, ComposeStoryPayload>(
       `${BASE(projectId)}/composer/compose`,
       payload,
-      aiRequestConfig,
+    ),
+
+  getStoryBoard: (projectId: string) =>
+    apiGet<ApiResponse<StoryBoard>>(`${BASE(projectId)}/composer/stories`),
+
+  planEpisode: (projectId: string, episodeNumber: number) =>
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, { episodeNumber: number }>(
+      `${BASE(projectId)}/composer/plan-episode`,
+      { episodeNumber },
+    ),
+
+  rememberSeasonSize: (projectId: string, totalEpisodes: number) =>
+    apiPost<ApiResponse<ComposerStatus>, { totalEpisodes: number }>(
+      `${BASE(projectId)}/composer/season-size`,
+      { totalEpisodes },
     ),
 
   expandEpisodes: (projectId: string, payload: ExpandEpisodesPayload) =>

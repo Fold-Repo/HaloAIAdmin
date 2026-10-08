@@ -1,9 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  formatRuntime,
-} from '@/features/episode-planner/utils/episode-planner.utils';
+import { formatRuntime } from '@/features/episode-planner/utils/episode-planner.utils';
 import type { EpisodePlannerSummary } from '@/types';
 
 export function ProgressTracker({ summary }: { summary: EpisodePlannerSummary }) {

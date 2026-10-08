@@ -85,12 +85,7 @@ export function OtpVerificationPage() {
       footer={
         !isVerified ? (
           <div className="flex w-full flex-col gap-3">
-            <Button
-              type="submit"
-              form="otp-form"
-              className="w-full"
-              disabled={isVerifying}
-            >
+            <Button type="submit" form="otp-form" className="w-full" disabled={isVerifying}>
               {isVerifying ? 'Verifying...' : 'Verify code'}
             </Button>
             <Button
@@ -161,10 +156,7 @@ export function OtpVerificationPage() {
             <label htmlFor="confirmPassword" className="text-sm font-medium">
               Confirm password
             </label>
-            <PasswordInput
-              id="confirmPassword"
-              {...resetForm.register('confirmPassword')}
-            />
+            <PasswordInput id="confirmPassword" {...resetForm.register('confirmPassword')} />
             {resetForm.formState.errors.confirmPassword && (
               <p className="text-destructive text-sm">
                 {resetForm.formState.errors.confirmPassword.message}
