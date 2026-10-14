@@ -15,13 +15,7 @@ export type StoryBibleSection =
 
 export type CharacterRole = 'protagonist' | 'antagonist' | 'supporting' | 'minor';
 
-export type RelationshipType =
-  | 'ally'
-  | 'rival'
-  | 'family'
-  | 'romantic'
-  | 'mentor'
-  | 'enemy';
+export type RelationshipType = 'ally' | 'rival' | 'family' | 'romantic' | 'mentor' | 'enemy';
 
 export type StoryOverview = {
   projectId: string;
@@ -235,6 +229,12 @@ export type ExtractEpisodesResult = {
   scenesCreated: number;
   scenesUpdated: number;
   episodes: import('./episode-planner.types').Episode[];
+};
+
+export type EnrichCharacterLooksResult = {
+  updated: Array<{ id: string; name: string; filled: string[] }>;
+  pending: number;
+  message: string;
 };
 
 export type GenerateStoryVisualResult = {

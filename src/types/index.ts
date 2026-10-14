@@ -53,6 +53,7 @@ export type {
   StoryProp,
   ExtractEpisodesPreview,
   ExtractEpisodesResult,
+  EnrichCharacterLooksResult,
   GenerateStoryVisualResult,
   StoryVersion,
   TimelineEvent,
@@ -66,6 +67,8 @@ export type {
   ComposeStoryResult,
   ComposerBatchInfo,
   ComposerNextStep,
+  EpisodeBatch,
+  SeasonEpisodeRow,
   ComposerStatus,
   ExpandEpisodesPayload,
   ExpandEpisodesResult,
@@ -76,6 +79,9 @@ export type {
   SyncEpisodeCountResult,
   SyncStorySummaryResult,
   ResyncStoryDocumentResult,
+  StoryBoard,
+  StoryBoardEpisode,
+  StoryBoardScene,
 } from './story-composer.types';
 export type {
   CliffhangerSuggestion,

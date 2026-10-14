@@ -73,4 +73,3 @@ export function FeatureErrorBoundary({
 }) {
   return <ErrorBoundary feature={feature}>{children}</ErrorBoundary>;
 }
-

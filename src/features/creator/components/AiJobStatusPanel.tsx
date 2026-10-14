@@ -62,9 +62,7 @@ export function AiJobStatusPanel({ jobs, compact = false }: AiJobStatusPanelProp
               </div>
               <AiJobStatusBadge status={job.status} />
             </div>
-            {job.message && (
-              <p className="text-muted-foreground text-xs">{job.message}</p>
-            )}
+            {job.message && <p className="text-muted-foreground text-xs">{job.message}</p>}
             {(job.status === 'running' || job.status === 'queued') && (
               <Progress value={job.progress} />
             )}

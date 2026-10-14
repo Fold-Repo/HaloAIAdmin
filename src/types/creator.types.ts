@@ -67,6 +67,7 @@ export type AiJob = {
   status: AiJobStatus;
   progress: number;
   message?: string;
+  errorMessage?: string;
   agentId?: string;
   startedAt?: string;
   completedAt?: string;

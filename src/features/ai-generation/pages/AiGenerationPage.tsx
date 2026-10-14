@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState, LoadingScreen, QueryError } from '@/components/common';
 import { AgentPanel } from '@/features/ai-generation/components/AgentPanel';
 import { AiDirectorDashboard } from '@/features/ai-generation/components/AiDirectorDashboard';
-import {
-  AiDirectorNav,
-  getAiSectionMeta,
-} from '@/features/ai-generation/components/AiDirectorNav';
+import { AiDirectorNav, getAiSectionMeta } from '@/features/ai-generation/components/AiDirectorNav';
 import { AiLogsPanel } from '@/features/ai-generation/components/AiLogsPanel';
 import { CostEstimatorPanel } from '@/features/ai-generation/components/CostEstimatorPanel';
 import { PromptBuilderPanel } from '@/features/ai-generation/components/PromptBuilderPanel';
@@ -128,15 +125,11 @@ export function AiGenerationPage() {
         <AiDirectorDashboard projectId={projectId} overview={overview} />
       )}
 
-      {isAgentSection(section) && (
-        <AgentSection projectId={projectId} agentId={section} />
-      )}
+      {isAgentSection(section) && <AgentSection projectId={projectId} agentId={section} />}
 
       {section === 'prompt-builder' && <PromptBuilderPanel projectId={projectId} />}
 
-      {section === 'cost' && costQuery.data && (
-        <CostEstimatorPanel estimate={costQuery.data} />
-      )}
+      {section === 'cost' && costQuery.data && <CostEstimatorPanel estimate={costQuery.data} />}
 
       {section === 'logs' && logsQuery.data && <AiLogsPanel logs={logsQuery.data} />}
     </div>

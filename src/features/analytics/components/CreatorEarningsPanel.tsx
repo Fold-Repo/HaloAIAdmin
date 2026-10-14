@@ -50,7 +50,10 @@ export function CreatorEarningsPanel({ earnings }: { earnings: CreatorEarnings }
         <CardContent>
           <div className="space-y-3">
             {earnings.breakdown.map((item) => (
-              <div key={item.source} className="flex items-center justify-between rounded-lg border p-3">
+              <div
+                key={item.source}
+                className="flex items-center justify-between rounded-lg border p-3"
+              >
                 <span className="text-sm">{item.source}</span>
                 <span className="font-medium">{formatUsd(item.amountUsd)}</span>
               </div>

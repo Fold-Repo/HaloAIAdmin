@@ -108,9 +108,7 @@ export function AdminPortalPage() {
         <AdminOverviewPanel overview={overviewQuery.data} />
       )}
 
-      {section === 'users' && usersQuery.data && (
-        <UserManagementPanel users={usersQuery.data} />
-      )}
+      {section === 'users' && usersQuery.data && <UserManagementPanel users={usersQuery.data} />}
 
       {section === 'creators' && creatorsQuery.data && (
         <CreatorManagementPanel creators={creatorsQuery.data} />
@@ -132,13 +130,9 @@ export function AdminPortalPage() {
         <RewardedAdsDashboardPanel metrics={rewardedAdsQuery.data} />
       )}
 
-      {section === 'coins' && coinsQuery.data && (
-        <CoinEconomyPanel metrics={coinsQuery.data} />
-      )}
+      {section === 'coins' && coinsQuery.data && <CoinEconomyPanel metrics={coinsQuery.data} />}
 
-      {section === 'reports' && reportsQuery.data && (
-        <ReportsPanel reports={reportsQuery.data} />
-      )}
+      {section === 'reports' && reportsQuery.data && <ReportsPanel reports={reportsQuery.data} />}
 
       {section === 'audit-logs' && auditLogsQuery.data && (
         <AuditLogsPanel logs={auditLogsQuery.data} />

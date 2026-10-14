@@ -2,7 +2,10 @@ import { Link } from 'react-router-dom';
 
 import { EmptyState, QueryError } from '@/components/common';
 import { Button } from '@/components/ui/button';
-import { useMarkAllNotificationsRead, useMarkNotificationRead } from '@/features/creator/hooks/useCreatorMutations';
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+} from '@/features/creator/hooks/useCreatorMutations';
 import { useNotifications } from '@/features/creator/hooks/useCreatorQueries';
 import { formatRelativeDate } from '@/features/creator/utils/creator.utils';
 import { ROUTES } from '@/constants';

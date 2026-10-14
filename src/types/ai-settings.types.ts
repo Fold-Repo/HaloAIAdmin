@@ -1,13 +1,7 @@
 export type AiSelectionMode = 'auto' | 'manual';
 
 export type AiTaskCategory =
-  | 'story'
-  | 'script'
-  | 'character'
-  | 'video'
-  | 'voice'
-  | 'subtitle'
-  | 'music';
+  'story' | 'script' | 'character' | 'video' | 'voice' | 'subtitle' | 'music';
 
 export type AiModelCatalogItem = {
   id: string;

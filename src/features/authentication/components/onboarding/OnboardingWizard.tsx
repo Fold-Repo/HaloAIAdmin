@@ -128,8 +128,8 @@ export function OnboardingWizard() {
             <div className="space-y-2 text-center">
               <h2 className="text-lg font-semibold">You are all set</h2>
               <p className="text-muted-foreground text-sm">
-                Your studio profile for <strong>{form.watch('studioName')}</strong> is ready.
-                You can update these preferences later in settings.
+                Your studio profile for <strong>{form.watch('studioName')}</strong> is ready. You
+                can update these preferences later in settings.
               </p>
             </div>
           )}

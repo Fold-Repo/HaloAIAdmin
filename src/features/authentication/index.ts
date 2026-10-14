@@ -23,11 +23,7 @@ export {
   UnauthorizedPage,
 } from './pages';
 
-export {
-  OnboardingRoute,
-  ProtectedRoute,
-  PublicRoute,
-} from './routes/ProtectedRoute';
+export { OnboardingRoute, ProtectedRoute, PublicRoute } from './routes/ProtectedRoute';
 export { RoleRoute } from './routes/RoleRoute';
 
 export {

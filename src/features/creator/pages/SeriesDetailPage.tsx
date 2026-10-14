@@ -48,9 +48,7 @@ export function SeriesDetailPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link to={ROUTES.STUDIO.SEASONS.replace(':seriesId', series.id)}>
-              Manage seasons
-            </Link>
+            <Link to={ROUTES.STUDIO.SEASONS.replace(':seriesId', series.id)}>Manage seasons</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link to={ROUTES.STUDIO.SERIES}>All series</Link>
@@ -65,8 +63,7 @@ export function SeriesDetailPage() {
         <CardContent className="space-y-2 text-sm">
           <p>{series.description}</p>
           <p className="text-muted-foreground">
-            {series.seasonCount} seasons · {series.projectCount} projects · Status:{' '}
-            {series.status}
+            {series.seasonCount} seasons · {series.projectCount} projects · Status: {series.status}
           </p>
         </CardContent>
       </Card>
