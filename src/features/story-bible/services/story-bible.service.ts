@@ -156,9 +156,12 @@ export const storyBibleService = {
   generateCharacterImage: (
     projectId: string,
     characterId: string,
-    payload?: { regenerate?: boolean },
+    payload?: { regenerate?: boolean; referenceImage?: string },
   ) =>
-    apiPost<ApiResponse<GenerateStoryVisualResult>, { regenerate?: boolean }>(
+    apiPost<
+      ApiResponse<GenerateStoryVisualResult>,
+      { regenerate?: boolean; referenceImage?: string }
+    >(
       `${BASE(projectId)}/characters/${characterId}/generate-image`,
       payload ?? {},
       aiRequestConfig,

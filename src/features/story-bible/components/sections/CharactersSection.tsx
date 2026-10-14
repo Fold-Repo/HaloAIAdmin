@@ -1,4 +1,5 @@
 import { Loader2, RefreshCw, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,24 @@ export function CharactersSection({ projectId, characters }: CharactersSectionPr
 
 function CharacterCard({ projectId, character }: { projectId: string; character: StoryCharacter }) {
   const generateImage = useGenerateCharacterImage(projectId);
+  const [referenceImage, setReferenceImage] = useState<string | undefined>();
+  const [referenceName, setReferenceName] = useState('');
   const imageApiUrl = character.imageUrl ? getCharacterImageApiUrl(projectId, character.id) : null;
+
+  const onReferenceSelected = (file: File | undefined) => {
+    if (!file) {
+      setReferenceImage(undefined);
+      setReferenceName('');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      setReferenceImage(result || undefined);
+      setReferenceName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <EntityCard title={character.name} subtitle={character.role}>
@@ -67,7 +85,8 @@ function CharacterCard({ projectId, character }: { projectId: string; character:
             onClick={() =>
               void generateImage.mutateAsync({
                 characterId: character.id,
-                regenerate: Boolean(character.imageUrl),
+                regenerate: Boolean(character.imageUrl) || Boolean(referenceImage),
+                referenceImage,
               })
             }
           >
@@ -80,6 +99,20 @@ function CharacterCard({ projectId, character }: { projectId: string; character:
             )}
             {character.imageUrl ? 'Regenerate portrait' : 'Generate portrait'}
           </Button>
+          <label className="text-muted-foreground text-xs">
+            Reference photo
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="mt-1 block w-full text-xs"
+              onChange={(event) => onReferenceSelected(event.target.files?.[0])}
+            />
+          </label>
+          {referenceName && (
+            <p className="text-muted-foreground text-xs">
+              Using {referenceName} as the face reference.
+            </p>
+          )}
           {generateImage.isError && (
             <p className="text-destructive text-xs">{generateImage.error.message}</p>
           )}

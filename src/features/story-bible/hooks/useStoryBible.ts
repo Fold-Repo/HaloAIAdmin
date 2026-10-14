@@ -371,10 +371,11 @@ export function useGenerateCharacterImage(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { characterId: string; regenerate?: boolean }) =>
+    mutationFn: (payload: { characterId: string; regenerate?: boolean; referenceImage?: string }) =>
       storyBibleService
         .generateCharacterImage(projectId, payload.characterId, {
           regenerate: payload.regenerate,
+          referenceImage: payload.referenceImage,
         })
         .then((response) => response.data),
     onSuccess: () => {
