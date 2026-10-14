@@ -53,6 +53,7 @@ export type {
   StoryProp,
   ExtractEpisodesPreview,
   ExtractEpisodesResult,
+  EnrichCharacterLooksResult,
   GenerateStoryVisualResult,
   StoryVersion,
   TimelineEvent,

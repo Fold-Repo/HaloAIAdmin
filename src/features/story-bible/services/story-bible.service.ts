@@ -10,6 +10,7 @@ import type {
   ExtractEpisodesResult,
   GenerateEpisodeBatchPayload,
   GenerateEpisodeBatchAccepted,
+  EnrichCharacterLooksResult,
   GenerateStoryVisualResult,
   StoryBible,
   StoryDocument,
@@ -152,6 +153,13 @@ export const storyBibleService = {
       }>,
       typeof payload
     >(`${BASE(projectId)}/episodes/${episodeId}/scene-plan-chat`, payload, aiRequestConfig),
+
+  enrichCharacterLooks: (projectId: string) =>
+    apiPost<ApiResponse<EnrichCharacterLooksResult>>(
+      `${BASE(projectId)}/characters/enrich-looks`,
+      {},
+      aiRequestConfig,
+    ),
 
   generateCharacterImage: (
     projectId: string,

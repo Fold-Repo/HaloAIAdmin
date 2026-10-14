@@ -9,7 +9,10 @@ import {
   EntityCard,
   SectionShell,
 } from '@/features/story-bible/components/SectionShell';
-import { useGenerateCharacterImage } from '@/features/story-bible/hooks/useStoryBible';
+import {
+  useEnrichCharacterLooks,
+  useGenerateCharacterImage,
+} from '@/features/story-bible/hooks/useStoryBible';
 import { getCharacterImageApiUrl } from '@/features/story-bible/utils/story-bible.utils';
 import type { StoryCharacter } from '@/types';
 
@@ -19,15 +22,46 @@ type CharactersSectionProps = {
 };
 
 export function CharactersSection({ projectId, characters }: CharactersSectionProps) {
+  const enrichLooks = useEnrichCharacterLooks(projectId);
+  const missingLooks = characters.some(
+    (character) => !character.backstory?.trim() || !character.visualNotes?.trim(),
+  );
+
   return (
     <SectionShell
       title="Characters"
       description="Maintain character consistency across AI script, voice, and video generation."
+      action={
+        missingLooks ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={enrichLooks.isPending}
+            onClick={() => enrichLooks.mutate()}
+          >
+            {enrichLooks.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            Fill missing looks
+          </Button>
+        ) : null
+      }
     >
       {characters.length === 0 ? (
         <EmptySectionState message="No characters yet. Run Story Composer from the project page to populate the bible, or sync summary after adding episodes." />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
+          {enrichLooks.isError && (
+            <p className="text-destructive col-span-full text-sm">{enrichLooks.error.message}</p>
+          )}
+          {enrichLooks.isSuccess && (
+            <p className="text-muted-foreground col-span-full text-sm">
+              {enrichLooks.data.message}
+            </p>
+          )}
           {characters.map((character) => (
             <CharacterCard key={character.id} projectId={projectId} character={character} />
           ))}

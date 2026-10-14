@@ -367,6 +367,18 @@ export function useScenePlanChat(projectId: string, episodeId: string) {
   });
 }
 
+export function useEnrichCharacterLooks(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      storyBibleService.enrichCharacterLooks(projectId).then((response) => response.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+    },
+  });
+}
+
 export function useGenerateCharacterImage(projectId: string) {
   const queryClient = useQueryClient();
 

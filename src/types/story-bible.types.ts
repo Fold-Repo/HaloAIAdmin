@@ -231,6 +231,12 @@ export type ExtractEpisodesResult = {
   episodes: import('./episode-planner.types').Episode[];
 };
 
+export type EnrichCharacterLooksResult = {
+  updated: Array<{ id: string; name: string; filled: string[] }>;
+  pending: number;
+  message: string;
+};
+
 export type GenerateStoryVisualResult = {
   imageUrl: string;
   imagePromptHash: string;
