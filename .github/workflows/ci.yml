@@ -101,8 +101,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Dry-run manifests
-        run: kubectl apply --dry-run=client --validate=false -f k8s/deployment.yaml
+      - name: Validate manifests offline
+        run: |
+          # kubectl apply --dry-run=client still discovers the API server.
+          # CI has no cluster, so that call hits localhost:8080 and fails.
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
+          ./kubeconform -strict -summary -kubernetes-version 1.31.0 k8s/deployment.yaml
