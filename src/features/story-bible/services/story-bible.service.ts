@@ -222,4 +222,7 @@ export const storyBibleService = {
 
   getNarrationAudioUrl: (projectId: string) =>
     `${appConfig.api.baseUrl}${BASE(projectId)}/narration/audio`,
+
+  getNarrationChapterAudioUrl: (projectId: string, chapterId: string) =>
+    `${appConfig.api.baseUrl}${BASE(projectId)}/narration/chapters/${encodeURIComponent(chapterId)}/audio`,
 };

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Headphones, Loader2, Pause, Play, RefreshCw, Square, Volume2 } from 'lucide-react';
 
-import { fetchAuthenticatedBlob } from '@/api/client';
 import { Button } from '@/components/ui/button';
+import { useNarrationPlayback } from '@/features/story-bible/components/NarrationPlaybackContext';
 import {
   useGenerateStoryNarration,
   useStoryNarration,
@@ -18,54 +18,14 @@ type StoryNarrationPlayerProps = {
 export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrationPlayerProps) {
   const narrationQuery = useStoryNarration(projectId, hasEpisodePlan);
   const generateMutation = useGenerateStoryNarration(projectId);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [loadingAudio, setLoadingAudio] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [browserPlaying, setBrowserPlaying] = useState(false);
+  const playback = useNarrationPlayback();
   const [error, setError] = useState<string | null>(null);
 
   const status = narrationQuery.data;
   const canPlayStudioAudio = status?.status === 'ready' || status?.status === 'stale';
-
-  useEffect(() => {
-    if (!canPlayStudioAudio) {
-      setBlobUrl(null);
-      return;
-    }
-
-    let active = true;
-    let objectUrl: string | null = null;
-    setLoadingAudio(true);
-    setError(null);
-
-    void fetchAuthenticatedBlob(storyBibleService.getNarrationAudioUrl(projectId))
-      .then((url) => {
-        if (!active) {
-          URL.revokeObjectURL(url);
-          return;
-        }
-        objectUrl = url;
-        setBlobUrl(url);
-      })
-      .catch(() => {
-        if (active) setError('Could not load narration audio.');
-      })
-      .finally(() => {
-        if (active) setLoadingAudio(false);
-      });
-
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [projectId, canPlayStudioAudio, status?.scriptHash, status?.generatedAt]);
-
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis?.cancel();
-    };
-  }, []);
+  const playingFull = playback.playing?.mode === 'full';
+  const browserPlayingAll =
+    playback.playing?.mode === 'browser' && playback.playing.chapterId === undefined;
 
   const chapterLabel = useMemo(() => {
     if (!status) return null;
@@ -88,30 +48,14 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
     }
   };
 
-  const togglePlay = async () => {
-    const audio = audioRef.current;
-    if (!audio || !blobUrl) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-      return;
-    }
-    window.speechSynthesis?.cancel();
-    setBrowserPlaying(false);
+  const toggleFullPlay = async () => {
+    if (!canPlayStudioAudio) return;
+    setError(null);
     try {
-      await audio.play();
-      setPlaying(true);
+      await playback.playFull(storyBibleService.getNarrationAudioUrl(projectId));
     } catch {
-      setError('Playback failed. Try regenerating narration.');
+      setError('Playback failed. Regenerate narration to create per-episode audio.');
     }
-  };
-
-  const stopAll = () => {
-    audioRef.current?.pause();
-    if (audioRef.current) audioRef.current.currentTime = 0;
-    setPlaying(false);
-    window.speechSynthesis?.cancel();
-    setBrowserPlaying(false);
   };
 
   const quickListenBrowser = async () => {
@@ -119,30 +63,16 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
       setError('Browser speech is not supported in this browser.');
       return;
     }
-    if (browserPlaying) {
-      window.speechSynthesis.cancel();
-      setBrowserPlaying(false);
-      return;
-    }
-
     setError(null);
-    audioRef.current?.pause();
-    setPlaying(false);
-
     try {
+      if (browserPlayingAll) {
+        playback.stop();
+        return;
+      }
       const script = await storyBibleService
         .getNarrationScript(projectId)
         .then((response) => response.data);
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(script.fullText);
-      utterance.rate = 1;
-      utterance.onend = () => setBrowserPlaying(false);
-      utterance.onerror = () => {
-        setBrowserPlaying(false);
-        setError('Browser narration stopped unexpectedly.');
-      };
-      setBrowserPlaying(true);
-      window.speechSynthesis.speak(utterance);
+      playback.playBrowserText(script.fullText);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load narration script.');
     }
@@ -159,7 +89,7 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
             Listen to the story
           </div>
           <p className="text-muted-foreground text-xs">
-            Hear the full season plan from overview through every episode before generating videos.
+            Play the full season, or use <strong>Listen</strong> on each episode card below.
           </p>
           {chapterLabel ? <p className="text-muted-foreground text-xs">{chapterLabel}</p> : null}
           {status?.status === 'stale' ? (
@@ -176,10 +106,20 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {canPlayStudioAudio && blobUrl ? (
-            <Button size="sm" onClick={() => void togglePlay()} disabled={loadingAudio}>
-              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
-              {playing ? 'Pause' : 'Play studio narration'}
+          {canPlayStudioAudio ? (
+            <Button
+              size="sm"
+              onClick={() => void toggleFullPlay()}
+              disabled={playback.loadingId === 'full'}
+            >
+              {playback.loadingId === 'full' ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : playingFull ? (
+                <Pause className="size-4" />
+              ) : (
+                <Play className="size-4" />
+              )}
+              {playingFull ? 'Pause full story' : 'Play full story'}
             </Button>
           ) : (
             <Button
@@ -218,30 +158,48 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
             onClick={() => void quickListenBrowser()}
             disabled={generateMutation.isPending}
           >
-            {browserPlaying ? <Square className="size-4" /> : <Play className="size-4" />}
-            {browserPlaying ? 'Stop quick listen' : 'Quick listen (browser)'}
+            {browserPlayingAll ? <Square className="size-4" /> : <Play className="size-4" />}
+            {browserPlayingAll ? 'Stop quick listen' : 'Quick listen (browser)'}
           </Button>
 
-          {(playing || browserPlaying) && (
-            <Button size="sm" variant="ghost" onClick={stopAll}>
+          {playback.playing ? (
+            <Button size="sm" variant="ghost" onClick={playback.stop}>
               <Square className="size-4" />
               Stop
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
 
-      {blobUrl ? (
-        <audio
-          ref={audioRef}
-          src={blobUrl}
-          preload="metadata"
-          onEnded={() => setPlaying(false)}
-          onPause={() => setPlaying(false)}
-          onPlay={() => setPlaying(true)}
-          className="w-full"
-          controls
-        />
+      {canPlayStudioAudio && status?.chapters?.length ? (
+        <div className="flex flex-wrap gap-2">
+          {status.chapters.map((chapter) => {
+            const active = playback.isChapterPlaying(chapter.id);
+            const loading = playback.loadingId === chapter.id;
+            return (
+              <Button
+                key={chapter.id}
+                size="sm"
+                variant={active ? 'default' : 'outline'}
+                disabled={!chapter.audioUrl || generateMutation.isPending}
+                onClick={() =>
+                  void playback
+                    .playChapter(chapter.id)
+                    .catch(() => setError('Episode audio missing — regenerate narration.'))
+                }
+              >
+                {loading ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : active ? (
+                  <Pause className="size-3" />
+                ) : (
+                  <Play className="size-3" />
+                )}
+                {chapter.episodeNumber != null ? `Ep ${chapter.episodeNumber}` : chapter.title}
+              </Button>
+            );
+          })}
+        </div>
       ) : null}
 
       {(error || mutationError || narrationQuery.error) && (

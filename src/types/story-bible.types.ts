@@ -249,6 +249,7 @@ export type StoryNarrationChapterSummary = {
   title: string;
   episodeNumber: number | null;
   charCount: number;
+  audioUrl: string | null;
 };
 
 export type StoryNarrationStatus = {
