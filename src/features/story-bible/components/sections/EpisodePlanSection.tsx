@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, ListPlus, Loader2, Pause, Play, Sparkles } from 'lucide-react';
+import { CheckCircle2, Circle, ListPlus, Pause, Play, Sparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import {
   useNarrationPlayback,
 } from '@/features/story-bible/components/NarrationPlaybackContext';
 import { StoryNarrationPlayer } from '@/features/story-bible/components/StoryNarrationPlayer';
-import { useStoryNarration, useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
+import { useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
 import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
@@ -57,14 +57,11 @@ function EpisodePlanSectionInner({
   composerMeta,
 }: EpisodePlanSectionProps) {
   const syncMutation = useSyncEpisodeCount(projectId);
-  const narrationQuery = useStoryNarration(projectId, episodePlan.length > 0);
   const sorted = [...episodePlan].sort((a, b) => a.number - b.number);
   const generatedCount = sorted.filter((entry) => entry.generated).length;
   const totalCount = sorted.length;
   const progress = totalCount > 0 ? Math.round((generatedCount / totalCount) * 100) : 0;
   const pendingCount = totalCount - generatedCount;
-  const canPlayStudio =
-    narrationQuery.data?.status === 'ready' || narrationQuery.data?.status === 'stale';
 
   return (
     <SectionShell
@@ -140,16 +137,7 @@ function EpisodePlanSectionInner({
 
           <div className="space-y-4">
             {sorted.map((episode) => (
-              <EpisodePlanCard
-                key={episode.id}
-                projectId={projectId}
-                episode={episode}
-                chapterId={
-                  narrationQuery.data?.chapters.find((c) => c.episodeNumber === episode.number)
-                    ?.id ?? episode.id
-                }
-                canPlayStudio={canPlayStudio}
-              />
+              <EpisodePlanCard key={episode.id} projectId={projectId} episode={episode} />
             ))}
           </div>
         </div>
@@ -158,32 +146,22 @@ function EpisodePlanSectionInner({
   );
 }
 
-function EpisodePlanCard({
-  projectId,
-  episode,
-  chapterId,
-  canPlayStudio,
-}: {
-  projectId: string;
-  episode: EpisodePlanEntry;
-  chapterId: string;
-  canPlayStudio: boolean;
-}) {
+function EpisodePlanCard({ projectId, episode }: { projectId: string; episode: EpisodePlanEntry }) {
   const actLabel = ACT_PHASE_LABELS[episode.actPhase] ?? episode.actPhase;
   const playback = useNarrationPlayback();
+  const chapterId = episode.id;
   const active = playback.isChapterPlaying(chapterId);
-  const loading = playback.loadingId === chapterId;
-
-  const listenStudio = () => {
-    void playback.playChapter(chapterId);
-  };
 
   const listenBrowser = async () => {
+    if (active) {
+      playback.stop();
+      return;
+    }
     const script = await storyBibleService
       .getNarrationScript(projectId)
       .then((response) => response.data);
     const chapter = script.chapters.find(
-      (entry) => entry.id === chapterId || entry.episodeNumber === episode.number,
+      (entry) => entry.episodeNumber === episode.number || entry.id === episode.id,
     );
     if (!chapter) return;
     playback.playBrowserText(`${chapter.title}. ${chapter.text}`, chapterId);
@@ -206,23 +184,14 @@ function EpisodePlanCard({
             Plan only
           </Badge>
         )}
-        {canPlayStudio ? (
-          <Button size="sm" variant={active ? 'default' : 'outline'} onClick={listenStudio}>
-            {loading ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : active ? (
-              <Pause className="size-3" />
-            ) : (
-              <Play className="size-3" />
-            )}
-            {active ? 'Pause episode' : 'Listen episode'}
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => void listenBrowser()}>
-            {active ? <Pause className="size-3" /> : <Play className="size-3" />}
-            {active ? 'Pause' : 'Quick listen'}
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant={active ? 'default' : 'outline'}
+          onClick={() => void listenBrowser()}
+        >
+          {active ? <Pause className="size-3" /> : <Play className="size-3" />}
+          {active ? 'Pause' : 'Listen'}
+        </Button>
       </div>
       <p className="leading-relaxed">{episode.synopsis}</p>
       {episode.keyBeats.length > 0 && (
