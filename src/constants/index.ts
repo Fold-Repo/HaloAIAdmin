@@ -78,6 +78,7 @@ export const QUERY_KEYS = {
   },
   storyBible: {
     detail: (projectId: string) => ['story-bible', projectId] as const,
+    narration: (projectId: string) => ['story-bible', projectId, 'narration'] as const,
   },
   storyComposer: {
     status: (projectId: string) => ['story-composer', projectId, 'status'] as const,

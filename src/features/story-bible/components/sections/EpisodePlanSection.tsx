@@ -9,6 +9,7 @@ import {
   EntityCard,
   SectionShell,
 } from '@/features/story-bible/components/SectionShell';
+import { StoryNarrationPlayer } from '@/features/story-bible/components/StoryNarrationPlayer';
 import { useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
 import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
@@ -89,6 +90,8 @@ export function EpisodePlanSection({
         <EmptySectionState message="No episode plan yet. Run Story Composer to plan the full season from your premise." />
       ) : (
         <div className="space-y-6">
+          <StoryNarrationPlayer projectId={projectId} hasEpisodePlan={sorted.length > 0} />
+
           <div className="bg-muted/40 space-y-3 rounded-lg border p-4">
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <span>

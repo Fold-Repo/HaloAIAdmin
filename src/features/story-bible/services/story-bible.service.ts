@@ -14,6 +14,8 @@ import type {
   GenerateStoryVisualResult,
   StoryBible,
   StoryDocument,
+  StoryNarrationScript,
+  StoryNarrationStatus,
   SyncEpisodeCountPayload,
   SyncEpisodeCountResult,
   StoryBoard,
@@ -23,6 +25,7 @@ import type {
   UpdateStoryOverviewPayload,
   ResyncStoryDocumentResult,
 } from '@/types';
+import { appConfig } from '@/config';
 
 const BASE = (projectId: string) => `/creator/projects/${projectId}/story-bible`;
 
@@ -203,4 +206,20 @@ export const storyBibleService = {
       payload ?? {},
       aiRequestConfig,
     ),
+
+  getNarrationStatus: (projectId: string) =>
+    apiGet<ApiResponse<StoryNarrationStatus>>(`${BASE(projectId)}/narration`),
+
+  getNarrationScript: (projectId: string) =>
+    apiGet<ApiResponse<StoryNarrationScript>>(`${BASE(projectId)}/narration/script`),
+
+  generateNarration: (projectId: string, payload?: { regenerate?: boolean }) =>
+    apiPost<ApiResponse<StoryNarrationStatus>, { regenerate?: boolean }>(
+      `${BASE(projectId)}/narration/generate`,
+      payload ?? {},
+      { ...aiRequestConfig, timeout: Math.max(appConfig.api.aiTimeout, 600_000) },
+    ),
+
+  getNarrationAudioUrl: (projectId: string) =>
+    `${appConfig.api.baseUrl}${BASE(projectId)}/narration/audio`,
 };

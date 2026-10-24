@@ -443,3 +443,25 @@ export function useGenerateWardrobeImage(projectId: string) {
     },
   });
 }
+
+export function useStoryNarration(projectId: string, enabled = true) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storyBible.narration(projectId),
+    queryFn: () =>
+      storyBibleService.getNarrationStatus(projectId).then((response) => response.data),
+    enabled: !!projectId && enabled,
+    retry: false,
+  });
+}
+
+export function useGenerateStoryNarration(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload?: { regenerate?: boolean }) =>
+      storyBibleService.generateNarration(projectId, payload).then((response) => response.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(QUERY_KEYS.storyBible.narration(projectId), data);
+    },
+  });
+}
