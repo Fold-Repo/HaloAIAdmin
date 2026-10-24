@@ -36,11 +36,7 @@ export {
   SeriesPage,
 } from './pages';
 
-export {
-  projectWizardSchema,
-  seasonSchema,
-  seriesSchema,
-} from './schemas/creator.schemas';
+export { projectWizardSchema, seasonSchema, seriesSchema } from './schemas/creator.schemas';
 
 export { creatorService } from './services/creator.service';
 

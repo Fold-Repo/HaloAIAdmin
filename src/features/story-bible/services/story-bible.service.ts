@@ -3,7 +3,6 @@ import { aiRequestConfig } from '@/api/request-timeouts';
 import type {
   ApiResponse,
   ComposeStoryPayload,
-  ComposeStoryResult,
   ComposerStatus,
   ExpandEpisodesPayload,
   ExpandEpisodesResult,
@@ -11,17 +10,22 @@ import type {
   ExtractEpisodesResult,
   GenerateEpisodeBatchPayload,
   GenerateEpisodeBatchAccepted,
+  EnrichCharacterLooksResult,
   GenerateStoryVisualResult,
   StoryBible,
   StoryDocument,
+  StoryNarrationScript,
+  StoryNarrationStatus,
   SyncEpisodeCountPayload,
   SyncEpisodeCountResult,
+  StoryBoard,
   SyncStorySummaryResult,
   UpdateStoryDocumentPayload,
   UpdateStoryEndingPayload,
   UpdateStoryOverviewPayload,
   ResyncStoryDocumentResult,
 } from '@/types';
+import { appConfig } from '@/config';
 
 const BASE = (projectId: string) => `/creator/projects/${projectId}/story-bible`;
 
@@ -74,10 +78,24 @@ export const storyBibleService = {
     apiGet<ApiResponse<ComposerStatus>>(`${BASE(projectId)}/composer/status`),
 
   composeStory: (projectId: string, payload: ComposeStoryPayload) =>
-    apiPost<ApiResponse<ComposeStoryResult>, ComposeStoryPayload>(
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, ComposeStoryPayload>(
       `${BASE(projectId)}/composer/compose`,
       payload,
-      aiRequestConfig,
+    ),
+
+  getStoryBoard: (projectId: string) =>
+    apiGet<ApiResponse<StoryBoard>>(`${BASE(projectId)}/composer/stories`),
+
+  planEpisode: (projectId: string, episodeNumber: number) =>
+    apiPost<ApiResponse<GenerateEpisodeBatchAccepted>, { episodeNumber: number }>(
+      `${BASE(projectId)}/composer/plan-episode`,
+      { episodeNumber },
+    ),
+
+  rememberSeasonSize: (projectId: string, totalEpisodes: number) =>
+    apiPost<ApiResponse<ComposerStatus>, { totalEpisodes: number }>(
+      `${BASE(projectId)}/composer/season-size`,
+      { totalEpisodes },
     ),
 
   expandEpisodes: (projectId: string, payload: ExpandEpisodesPayload) =>
@@ -139,12 +157,22 @@ export const storyBibleService = {
       typeof payload
     >(`${BASE(projectId)}/episodes/${episodeId}/scene-plan-chat`, payload, aiRequestConfig),
 
+  enrichCharacterLooks: (projectId: string) =>
+    apiPost<ApiResponse<EnrichCharacterLooksResult>>(
+      `${BASE(projectId)}/characters/enrich-looks`,
+      {},
+      aiRequestConfig,
+    ),
+
   generateCharacterImage: (
     projectId: string,
     characterId: string,
-    payload?: { regenerate?: boolean },
+    payload?: { regenerate?: boolean; referenceImage?: string },
   ) =>
-    apiPost<ApiResponse<GenerateStoryVisualResult>, { regenerate?: boolean }>(
+    apiPost<
+      ApiResponse<GenerateStoryVisualResult>,
+      { regenerate?: boolean; referenceImage?: string }
+    >(
       `${BASE(projectId)}/characters/${characterId}/generate-image`,
       payload ?? {},
       aiRequestConfig,
@@ -178,4 +206,23 @@ export const storyBibleService = {
       payload ?? {},
       aiRequestConfig,
     ),
+
+  getNarrationStatus: (projectId: string) =>
+    apiGet<ApiResponse<StoryNarrationStatus>>(`${BASE(projectId)}/narration`),
+
+  getNarrationScript: (projectId: string) =>
+    apiGet<ApiResponse<StoryNarrationScript>>(`${BASE(projectId)}/narration/script`),
+
+  generateNarration: (projectId: string, payload?: { regenerate?: boolean }) =>
+    apiPost<ApiResponse<StoryNarrationStatus>, { regenerate?: boolean }>(
+      `${BASE(projectId)}/narration/generate`,
+      payload ?? {},
+      { ...aiRequestConfig, timeout: Math.max(appConfig.api.aiTimeout, 600_000) },
+    ),
+
+  getNarrationAudioUrl: (projectId: string) =>
+    `${appConfig.api.baseUrl}${BASE(projectId)}/narration/audio`,
+
+  getNarrationChapterAudioUrl: (projectId: string, chapterId: string) =>
+    `${appConfig.api.baseUrl}${BASE(projectId)}/narration/chapters/${encodeURIComponent(chapterId)}/audio`,
 };

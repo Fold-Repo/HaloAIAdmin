@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, ListPlus, Sparkles } from 'lucide-react';
+import { CheckCircle2, Circle, ListPlus, Pause, Play, Sparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,16 @@ import {
   EntityCard,
   SectionShell,
 } from '@/features/story-bible/components/SectionShell';
+import {
+  NarrationPlaybackProvider,
+  useNarrationPlayback,
+} from '@/features/story-bible/components/NarrationPlaybackContext';
+import { StoryNarrationPlayer } from '@/features/story-bible/components/StoryNarrationPlayer';
 import { useSyncEpisodeCount } from '@/features/story-bible/hooks/useStoryBible';
 import { getEpisodePlannerPath } from '@/features/episode-planner/utils/episode-planner.utils';
 import { getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
 import { getStoryComposerPath } from '@/features/story-bible/utils/story-composer.utils';
+import { storyBibleService } from '@/features/story-bible/services/story-bible.service';
 import type { EpisodePlanEntry, StoryComposerMeta } from '@/types';
 
 const ACT_PHASE_LABELS: Record<string, string> = {
@@ -34,6 +40,22 @@ export function EpisodePlanSection({
   episodePlan,
   composerMeta,
 }: EpisodePlanSectionProps) {
+  return (
+    <NarrationPlaybackProvider projectId={projectId}>
+      <EpisodePlanSectionInner
+        projectId={projectId}
+        episodePlan={episodePlan}
+        composerMeta={composerMeta}
+      />
+    </NarrationPlaybackProvider>
+  );
+}
+
+function EpisodePlanSectionInner({
+  projectId,
+  episodePlan,
+  composerMeta,
+}: EpisodePlanSectionProps) {
   const syncMutation = useSyncEpisodeCount(projectId);
   const sorted = [...episodePlan].sort((a, b) => a.number - b.number);
   const generatedCount = sorted.filter((entry) => entry.generated).length;
@@ -44,7 +66,7 @@ export function EpisodePlanSection({
   return (
     <SectionShell
       title="Episode Plan"
-      description="The full season story from first episode to finale. Read this before generating scenes or video."
+      description="The full season story from first episode to finale. Listen episode by episode before generating scenes or video."
       action={
         <div className="flex flex-wrap gap-2">
           {totalCount > 0 && pendingCount > 0 ? (
@@ -89,6 +111,8 @@ export function EpisodePlanSection({
         <EmptySectionState message="No episode plan yet. Run Story Composer to plan the full season from your premise." />
       ) : (
         <div className="space-y-6">
+          <StoryNarrationPlayer projectId={projectId} hasEpisodePlan={sorted.length > 0} />
+
           <div className="bg-muted/40 space-y-3 rounded-lg border p-4">
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <span>
@@ -113,7 +137,7 @@ export function EpisodePlanSection({
 
           <div className="space-y-4">
             {sorted.map((episode) => (
-              <EpisodePlanCard key={episode.id} episode={episode} />
+              <EpisodePlanCard key={episode.id} projectId={projectId} episode={episode} />
             ))}
           </div>
         </div>
@@ -122,8 +146,26 @@ export function EpisodePlanSection({
   );
 }
 
-function EpisodePlanCard({ episode }: { episode: EpisodePlanEntry }) {
+function EpisodePlanCard({ projectId, episode }: { projectId: string; episode: EpisodePlanEntry }) {
   const actLabel = ACT_PHASE_LABELS[episode.actPhase] ?? episode.actPhase;
+  const playback = useNarrationPlayback();
+  const chapterId = episode.id;
+  const active = playback.isChapterPlaying(chapterId);
+
+  const listenBrowser = async () => {
+    if (active) {
+      playback.stop();
+      return;
+    }
+    const script = await storyBibleService
+      .getNarrationScript(projectId)
+      .then((response) => response.data);
+    const chapter = script.chapters.find(
+      (entry) => entry.episodeNumber === episode.number || entry.id === episode.id,
+    );
+    if (!chapter) return;
+    playback.playBrowserText(`${chapter.title}. ${chapter.text}`, chapterId);
+  };
 
   return (
     <EntityCard title={`Episode ${episode.number}: ${episode.title}`} subtitle={actLabel}>
@@ -142,6 +184,14 @@ function EpisodePlanCard({ episode }: { episode: EpisodePlanEntry }) {
             Plan only
           </Badge>
         )}
+        <Button
+          size="sm"
+          variant={active ? 'default' : 'outline'}
+          onClick={() => void listenBrowser()}
+        >
+          {active ? <Pause className="size-3" /> : <Play className="size-3" />}
+          {active ? 'Pause' : 'Listen'}
+        </Button>
       </div>
       <p className="leading-relaxed">{episode.synopsis}</p>
       {episode.keyBeats.length > 0 && (

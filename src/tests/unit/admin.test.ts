@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { moderationActionSchema } from '@/features/admin/schemas/admin.schemas';
-import {
-  formatUsd,
-  getAdminPath,
-  isAdminSection,
-} from '@/features/admin/utils/admin.utils';
+import { formatUsd, getAdminPath, isAdminSection } from '@/features/admin/utils/admin.utils';
 
 describe('admin utils', () => {
   it('builds admin paths', () => {

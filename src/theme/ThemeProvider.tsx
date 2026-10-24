@@ -30,9 +30,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return stored ?? 'system';
   });
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
-    resolveTheme(theme),
-  );
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(theme));
 
   useEffect(() => {
     const resolved = resolveTheme(theme);

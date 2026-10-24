@@ -40,10 +40,7 @@ export function SceneTimeline({
   isSelectingVideo = false,
 }: SceneTimelineProps) {
   const reorderScenes = useReorderScenes(projectId, episodeId);
-  const sortedScenes = useMemo(
-    () => [...scenes].sort((a, b) => a.order - b.order),
-    [scenes],
-  );
+  const sortedScenes = useMemo(() => [...scenes].sort((a, b) => a.order - b.order), [scenes]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -76,8 +73,15 @@ export function SceneTimeline({
             No scenes yet. Add scenes below to build the episode timeline.
           </p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={sortedScenes.map((scene) => scene.id)} strategy={verticalListSortingStrategy}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortedScenes.map((scene) => scene.id)}
+              strategy={verticalListSortingStrategy}
+            >
               <div className="space-y-3">
                 {sortedScenes.map((scene) => (
                   <SortableSceneCard

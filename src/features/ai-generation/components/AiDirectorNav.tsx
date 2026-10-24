@@ -1,6 +1,9 @@
 import { NavLink, useParams } from 'react-router-dom';
 
-import { AI_GENERATION_SECTIONS, getAiGenerationPath } from '@/features/ai-generation/utils/ai-generation.utils';
+import {
+  AI_GENERATION_SECTIONS,
+  getAiGenerationPath,
+} from '@/features/ai-generation/utils/ai-generation.utils';
 import { cn } from '@/utils';
 
 export function AiDirectorNav() {

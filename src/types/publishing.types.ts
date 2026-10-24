@@ -61,6 +61,7 @@ export type PublishOverview = {
   overallProgress: number;
   steps: PublishWizardStep[];
   readyToPublish: boolean;
+  episodesWithVideo: number;
 };
 
 export type PushNotificationPreview = {

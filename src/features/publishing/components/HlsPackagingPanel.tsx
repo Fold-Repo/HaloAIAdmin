@@ -51,9 +51,7 @@ export function HlsPackagingPanel({ packages }: { packages: HlsPackage[] }) {
                   ))}
                 </div>
               )}
-              {pkg.manifestUrl && (
-                <p className="font-mono text-xs break-all">{pkg.manifestUrl}</p>
-              )}
+              {pkg.manifestUrl && <p className="font-mono text-xs break-all">{pkg.manifestUrl}</p>}
               {pkg.errorMessage && (
                 <p className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
                   {pkg.errorMessage}

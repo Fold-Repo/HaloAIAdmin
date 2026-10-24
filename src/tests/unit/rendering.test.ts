@@ -11,9 +11,7 @@ import {
 describe('rendering utils', () => {
   it('builds rendering paths', () => {
     expect(getRenderingPath('proj-1')).toBe('/studio/projects/proj-1/rendering/progress');
-    expect(getRenderingPath('proj-1', 'queue')).toBe(
-      '/studio/projects/proj-1/rendering/queue',
-    );
+    expect(getRenderingPath('proj-1', 'queue')).toBe('/studio/projects/proj-1/rendering/queue');
   });
 
   it('validates section ids', () => {

@@ -119,11 +119,47 @@ export function useRestoreStoryVersion(projectId: string) {
 
 export type StoryBibleMutationError = ApiError;
 
-export function useComposerStatus(projectId: string) {
+export function useComposerStatus(projectId: string, options?: { poll?: boolean }) {
   return useQuery({
     queryKey: QUERY_KEYS.storyComposer.status(projectId),
     queryFn: () => storyBibleService.getComposerStatus(projectId).then((response) => response.data),
     enabled: !!projectId,
+    refetchInterval: options?.poll ? 4000 : false,
+  });
+}
+
+export function useStoryBoard(projectId: string, options?: { poll?: boolean }) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storyComposer.stories(projectId),
+    queryFn: () => storyBibleService.getStoryBoard(projectId).then((response) => response.data),
+    enabled: !!projectId,
+    refetchInterval: options?.poll ? 4000 : false,
+  });
+}
+
+export function usePlanEpisode(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (episodeNumber: number) =>
+      storyBibleService.planEpisode(projectId, episodeNumber).then((response) => response.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.jobs });
+    },
+  });
+}
+
+export function useRememberSeasonSize(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (totalEpisodes: number) =>
+      storyBibleService
+        .rememberSeasonSize(projectId, totalEpisodes)
+        .then((response) => response.data),
+    onSuccess: (status) => {
+      queryClient.setQueryData(QUERY_KEYS.storyComposer.status(projectId), status);
+    },
   });
 }
 
@@ -133,16 +169,10 @@ export function useComposeStory(projectId: string) {
   return useMutation({
     mutationFn: (payload: ComposeStoryPayload) =>
       storyBibleService.composeStory(projectId, payload).then((response) => response.data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.status(projectId) });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.episodePlanner.summary(projectId),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.episodePlanner.episodes(projectId),
-      });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.project(projectId) });
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.creator.jobs });
+      if ('async' in data && data.async) return;
+      invalidateStoryProduction(queryClient, projectId);
     },
   });
 }
@@ -218,13 +248,16 @@ export function useWatchEpisodeGenerateJob(projectId: string, jobId: string | nu
     enabled: !!projectId,
     refetchInterval: (query) => {
       const jobs = query.state.data ?? [];
+      const tracked = jobId ? jobs.find((item) => item.id === jobId) : undefined;
+      if (tracked?.status === 'completed' || tracked?.status === 'failed') return false;
+      if (jobId) return 2500;
       const hasActive = jobs.some(
         (item) =>
           item.projectId === projectId &&
           (item.status === 'queued' || item.status === 'running') &&
           (item.agentId === 'story-composer-generate' ||
             item.agentId === 'story-composer-sync' ||
-            (jobId != null && item.id === jobId)),
+            item.agentId === 'story-composer-compose'),
       );
       return hasActive ? 2500 : false;
     },
@@ -235,7 +268,9 @@ export function useWatchEpisodeGenerateJob(projectId: string, jobId: string | nu
       (item) =>
         item.projectId === projectId &&
         (item.status === 'queued' || item.status === 'running') &&
-        (item.agentId === 'story-composer-generate' || item.agentId === 'story-composer-sync'),
+        (item.agentId === 'story-composer-generate' ||
+          item.agentId === 'story-composer-sync' ||
+          item.agentId === 'story-composer-compose'),
     ) ?? (jobId ? jobsQuery.data?.find((item) => item.id === jobId) : undefined);
 
   const job = jobId ? (jobsQuery.data?.find((item) => item.id === jobId) ?? activeJob) : activeJob;
@@ -269,6 +304,7 @@ function invalidateStoryProduction(
   projectId: string,
 ) {
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.status(projectId) });
+  void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyComposer.stories(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.summary(projectId) });
   void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.episodePlanner.episodes(projectId) });
@@ -331,14 +367,27 @@ export function useScenePlanChat(projectId: string, episodeId: string) {
   });
 }
 
+export function useEnrichCharacterLooks(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      storyBibleService.enrichCharacterLooks(projectId).then((response) => response.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+    },
+  });
+}
+
 export function useGenerateCharacterImage(projectId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { characterId: string; regenerate?: boolean }) =>
+    mutationFn: (payload: { characterId: string; regenerate?: boolean; referenceImage?: string }) =>
       storyBibleService
         .generateCharacterImage(projectId, payload.characterId, {
           regenerate: payload.regenerate,
+          referenceImage: payload.referenceImage,
         })
         .then((response) => response.data),
     onSuccess: () => {
@@ -391,6 +440,28 @@ export function useGenerateWardrobeImage(projectId: string) {
         .then((response) => response.data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.storyBible.detail(projectId) });
+    },
+  });
+}
+
+export function useStoryNarration(projectId: string, enabled = true) {
+  return useQuery({
+    queryKey: QUERY_KEYS.storyBible.narration(projectId),
+    queryFn: () =>
+      storyBibleService.getNarrationStatus(projectId).then((response) => response.data),
+    enabled: !!projectId && enabled,
+    retry: false,
+  });
+}
+
+export function useGenerateStoryNarration(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload?: { regenerate?: boolean }) =>
+      storyBibleService.generateNarration(projectId, payload).then((response) => response.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(QUERY_KEYS.storyBible.narration(projectId), data);
     },
   });
 }

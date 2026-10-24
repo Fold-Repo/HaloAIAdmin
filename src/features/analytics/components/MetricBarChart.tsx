@@ -25,7 +25,11 @@ export function MetricBarChart<T extends Record<string, string | number>>({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis dataKey={xKey} tick={{ fontSize: 11 }} tickFormatter={(value: string) => value.slice(5)} />
+          <XAxis
+            dataKey={xKey}
+            tick={{ fontSize: 11 }}
+            tickFormatter={(value: string) => value.slice(5)}
+          />
           <YAxis tick={{ fontSize: 11 }} width={48} />
           <Tooltip />
           <Legend />

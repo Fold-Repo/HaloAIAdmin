@@ -31,15 +31,13 @@ export function ForgotPasswordPage() {
       description="We will send a verification code to your email."
       footer={
         <div className="flex w-full flex-col gap-3">
-          <Button
-            type="submit"
-            form="forgot-password-form"
-            className="w-full"
-            disabled={isPending}
-          >
+          <Button type="submit" form="forgot-password-form" className="w-full" disabled={isPending}>
             {isPending ? 'Sending code...' : 'Send verification code'}
           </Button>
-          <Link to={ROUTES.LOGIN} className="text-muted-foreground text-center text-sm hover:underline">
+          <Link
+            to={ROUTES.LOGIN}
+            className="text-muted-foreground text-center text-sm hover:underline"
+          >
             Back to sign in
           </Link>
         </div>

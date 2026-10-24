@@ -1,6 +1,9 @@
 import { NavLink, useParams } from 'react-router-dom';
 
-import { PUBLISHING_SECTIONS, getPublishingPath } from '@/features/publishing/utils/publishing.utils';
+import {
+  PUBLISHING_SECTIONS,
+  getPublishingPath,
+} from '@/features/publishing/utils/publishing.utils';
 import { cn } from '@/utils';
 
 export function PublishingNav() {

@@ -48,7 +48,9 @@ export function AiDirectorDashboard({ projectId, overview }: AiDirectorDashboard
           <CardContent>
             <p className="text-xl font-bold">{overview.pipelineStage}</p>
             <Progress className="mt-3" value={overview.overallProgress} />
-            <p className="text-muted-foreground mt-2 text-xs">{overview.overallProgress}% complete</p>
+            <p className="text-muted-foreground mt-2 text-xs">
+              {overview.overallProgress}% complete
+            </p>
           </CardContent>
         </Card>
         <Card>

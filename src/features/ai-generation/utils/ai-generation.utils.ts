@@ -47,15 +47,9 @@ export function isAiGenerationSection(value: string | undefined): value is AiGen
 }
 
 export function isAgentSection(section: AiGenerationSection): section is AiAgentId {
-  return [
-    'story-planner',
-    'script',
-    'character',
-    'video',
-    'voice',
-    'subtitle',
-    'music',
-  ].includes(section);
+  return ['story-planner', 'script', 'character', 'video', 'voice', 'subtitle', 'music'].includes(
+    section,
+  );
 }
 
 export function formatUsd(amount: number) {
