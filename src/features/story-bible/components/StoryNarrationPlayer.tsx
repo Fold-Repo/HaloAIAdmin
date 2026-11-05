@@ -89,6 +89,10 @@ export function StoryNarrationPlayer({ projectId, hasEpisodePlan }: StoryNarrati
       const next =
         script ??
         (await storyBibleService.getNarrationScript(projectId).then((response) => response.data));
+      if (!next) {
+        setError('Narration script is empty.');
+        return;
+      }
       if (!script) setScript(next);
       playback.playBrowserText(next.fullText);
     } catch (err) {
