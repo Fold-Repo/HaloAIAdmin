@@ -178,6 +178,7 @@ export async function apiDelete<T>(url: string, config?: AxiosRequestConfig) {
 export async function fetchAuthenticatedBlob(url: string): Promise<string> {
   const token = getStoredToken();
   const response = await fetch(url, {
+    cache: 'no-store',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 

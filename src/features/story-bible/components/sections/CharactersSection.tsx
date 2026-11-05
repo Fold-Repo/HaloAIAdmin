@@ -75,7 +75,10 @@ function CharacterCard({ projectId, character }: { projectId: string; character:
   const generateImage = useGenerateCharacterImage(projectId);
   const [referenceImage, setReferenceImage] = useState<string | undefined>();
   const [referenceName, setReferenceName] = useState('');
-  const imageApiUrl = character.imageUrl ? getCharacterImageApiUrl(projectId, character.id) : null;
+  const imageVersion = character.imageGeneratedAt ?? character.imagePromptHash ?? '';
+  const imageApiUrl = character.imageUrl
+    ? `${getCharacterImageApiUrl(projectId, character.id)}?v=${encodeURIComponent(imageVersion)}`
+    : null;
 
   const onReferenceSelected = (file: File | undefined) => {
     if (!file) {
