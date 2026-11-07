@@ -69,7 +69,10 @@ export function EpisodeAssemblePanel({
       }
       let blobUrl = previewBlobUrl;
       if (!blobUrl) {
-        blobUrl = await fetchAuthenticatedBlob(getAssembledVideoApiUrl(projectId, episodeId));
+        const version = episode.assembledAt ? `?v=${encodeURIComponent(episode.assembledAt)}` : '';
+        blobUrl = await fetchAuthenticatedBlob(
+          `${getAssembledVideoApiUrl(projectId, episodeId)}${version}`,
+        );
       }
       downloadBlob(
         blobUrl,
@@ -95,7 +98,10 @@ export function EpisodeAssemblePanel({
         setPreviewOpen(true);
         return;
       }
-      const blobUrl = await fetchAuthenticatedBlob(getAssembledVideoApiUrl(projectId, episodeId));
+      const version = episode.assembledAt ? `?v=${encodeURIComponent(episode.assembledAt)}` : '';
+      const blobUrl = await fetchAuthenticatedBlob(
+        `${getAssembledVideoApiUrl(projectId, episodeId)}${version}`,
+      );
       setPreviewBlobUrl((current) => {
         if (current && !/^https?:\/\//i.test(current)) URL.revokeObjectURL(current);
         return blobUrl;
