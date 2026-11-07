@@ -29,10 +29,7 @@ import {
   useRevenueMetrics,
   useWatchTimeMetrics,
 } from '@/features/analytics/hooks/useAnalytics';
-import {
-  getAnalyticsPath,
-  isAnalyticsSection,
-} from '@/features/analytics/utils/analytics.utils';
+import { getAnalyticsPath, isAnalyticsSection } from '@/features/analytics/utils/analytics.utils';
 import { useProject } from '@/features/creator/hooks/useCreatorQueries';
 import { ROUTES } from '@/constants';
 import { combineQueryState } from '@/utils';
@@ -149,9 +146,7 @@ export function AnalyticsPage() {
         <CostMetricsPanel title="Render cost" metrics={renderCostQuery.data} />
       )}
 
-      {section === 'growth' && growthQuery.data && (
-        <UserGrowthPanel metrics={growthQuery.data} />
-      )}
+      {section === 'growth' && growthQuery.data && <UserGrowthPanel metrics={growthQuery.data} />}
 
       {section === 'retention' && retentionQuery.data && (
         <RetentionPanel metrics={retentionQuery.data} />

@@ -11,9 +11,7 @@ import {
 describe('analytics utils', () => {
   it('builds analytics paths', () => {
     expect(getAnalyticsPath('proj-1')).toBe('/studio/projects/proj-1/analytics/dashboard');
-    expect(getAnalyticsPath('proj-1', 'revenue')).toBe(
-      '/studio/projects/proj-1/analytics/revenue',
-    );
+    expect(getAnalyticsPath('proj-1', 'revenue')).toBe('/studio/projects/proj-1/analytics/revenue');
   });
 
   it('validates section ids', () => {

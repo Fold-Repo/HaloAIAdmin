@@ -11,12 +11,12 @@ Use this document to implement the backend that replaces dev mocks and demo auth
 
 ## Overview
 
-| Item | Value |
-|------|-------|
-| **Base URL** | `http://localhost:3000/api` (configurable via `VITE_API_BASE_URL`) |
-| **Format** | JSON |
-| **Auth header** | `Authorization: Bearer <accessToken>` on protected routes |
-| **Content-Type** | `application/json` |
+| Item             | Value                                                              |
+| ---------------- | ------------------------------------------------------------------ |
+| **Base URL**     | `http://localhost:3000/api` (configurable via `VITE_API_BASE_URL`) |
+| **Format**       | JSON                                                               |
+| **Auth header**  | `Authorization: Bearer <accessToken>` on protected routes          |
+| **Content-Type** | `application/json`                                                 |
 
 ### Response envelope
 
@@ -49,29 +49,29 @@ The Axios client in `src/api/client.ts` expects this shape and automatically ref
 
 ### Roles
 
-| Role | Access |
-|------|--------|
-| `creator` | Creator studio routes under `/creator/*` |
-| `viewer` | Read-only creator routes (if enforced server-side) |
-| `admin` | `/admin/*` routes |
+| Role      | Access                                             |
+| --------- | -------------------------------------------------- |
+| `creator` | Creator studio routes under `/creator/*`           |
+| `viewer`  | Read-only creator routes (if enforced server-side) |
+| `admin`   | `/admin/*` routes                                  |
 
 ---
 
 ## Authentication (`/auth`)
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/auth/login` | No | Sign in |
-| `POST` | `/auth/register` | No | Create account |
-| `POST` | `/auth/logout` | Yes | Invalidate session |
-| `GET` | `/auth/session` | Yes | Restore current session |
-| `POST` | `/auth/refresh` | No* | Refresh access token |
-| `POST` | `/auth/forgot-password` | No | Send reset OTP/email |
-| `POST` | `/auth/verify-otp` | No | Verify OTP code |
-| `POST` | `/auth/resend-otp` | No | Resend OTP |
-| `POST` | `/auth/reset-password` | No | Reset password with OTP |
-| `PATCH` | `/auth/onboarding` | Yes | Complete creator onboarding |
-| `GET` | `/auth/oauth/:provider` | No | OAuth redirect (`google`, `github`, `apple`) |
+| Method  | Path                    | Auth | Description                                  |
+| ------- | ----------------------- | ---- | -------------------------------------------- |
+| `POST`  | `/auth/login`           | No   | Sign in                                      |
+| `POST`  | `/auth/register`        | No   | Create account                               |
+| `POST`  | `/auth/logout`          | Yes  | Invalidate session                           |
+| `GET`   | `/auth/session`         | Yes  | Restore current session                      |
+| `POST`  | `/auth/refresh`         | No*  | Refresh access token                         |
+| `POST`  | `/auth/forgot-password` | No   | Send reset OTP/email                         |
+| `POST`  | `/auth/verify-otp`      | No   | Verify OTP code                              |
+| `POST`  | `/auth/resend-otp`      | No   | Resend OTP                                   |
+| `POST`  | `/auth/reset-password`  | No   | Reset password with OTP                      |
+| `PATCH` | `/auth/onboarding`      | Yes  | Complete creator onboarding                  |
+| `GET`   | `/auth/oauth/:provider` | No   | OAuth redirect (`google`, `github`, `apple`) |
 
 \*Refresh uses `refreshToken` in body, not access token.
 
@@ -206,12 +206,12 @@ The Axios client in `src/api/client.ts` expects this shape and automatically ref
 
 ### Dashboard & projects
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/dashboard/stats` | Dashboard KPIs |
-| `GET` | `/creator/projects` | List projects |
-| `GET` | `/creator/projects/:projectId` | Get project |
-| `POST` | `/creator/projects` | Create project |
+| Method | Path                           | Description    |
+| ------ | ------------------------------ | -------------- |
+| `GET`  | `/creator/dashboard/stats`     | Dashboard KPIs |
+| `GET`  | `/creator/projects`            | List projects  |
+| `GET`  | `/creator/projects/:projectId` | Get project    |
+| `POST` | `/creator/projects`            | Create project |
 
 **`CreatorDashboardStats`**
 
@@ -265,16 +265,16 @@ The Axios client in `src/api/client.ts` expects this shape and automatically ref
 
 ### Series & seasons
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/series` | List series |
-| `GET` | `/creator/series/:seriesId` | Get series |
-| `POST` | `/creator/series` | Create series |
-| `PATCH` | `/creator/series/:seriesId` | Update series |
-| `DELETE` | `/creator/series/:seriesId` | Delete series |
-| `GET` | `/creator/series/:seriesId/seasons` | List seasons |
-| `POST` | `/creator/series/:seriesId/seasons` | Create season |
-| `PATCH` | `/creator/series/:seriesId/seasons/:seasonId` | Update season |
+| Method   | Path                                          | Description   |
+| -------- | --------------------------------------------- | ------------- |
+| `GET`    | `/creator/series`                             | List series   |
+| `GET`    | `/creator/series/:seriesId`                   | Get series    |
+| `POST`   | `/creator/series`                             | Create series |
+| `PATCH`  | `/creator/series/:seriesId`                   | Update series |
+| `DELETE` | `/creator/series/:seriesId`                   | Delete series |
+| `GET`    | `/creator/series/:seriesId/seasons`           | List seasons  |
+| `POST`   | `/creator/series/:seriesId/seasons`           | Create season |
+| `PATCH`  | `/creator/series/:seriesId/seasons/:seasonId` | Update season |
 
 **`CreateSeriesPayload`:** `{ "title", "description", "genre" }`  
 **`CreateSeasonPayload`:** `{ "seriesId", "title", "number", "description?" }`  
@@ -283,12 +283,12 @@ The Axios client in `src/api/client.ts` expects this shape and automatically ref
 
 ### Jobs & notifications
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/jobs` | List AI/render jobs |
-| `GET` | `/creator/notifications` | List notifications |
-| `PATCH` | `/creator/notifications/:notificationId/read` | Mark one read |
-| `POST` | `/creator/notifications/read-all` | Mark all read |
+| Method  | Path                                          | Description         |
+| ------- | --------------------------------------------- | ------------------- |
+| `GET`   | `/creator/jobs`                               | List AI/render jobs |
+| `GET`   | `/creator/notifications`                      | List notifications  |
+| `PATCH` | `/creator/notifications/:notificationId/read` | Mark one read       |
+| `POST`  | `/creator/notifications/read-all`             | Mark all read       |
 
 **`AiJob`:** `{ id, projectId, projectTitle, type, status, progress, message?, startedAt?, completedAt? }`  
 **Job types:** `script | character | video | voice | subtitle | render`  
@@ -301,20 +301,20 @@ The Axios client in `src/api/client.ts` expects this shape and automatically ref
 
 ## Story Bible (`/creator/projects/:projectId/story-bible`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/story-bible` | Full story bible document |
-| `PATCH` | `/creator/projects/:projectId/story-bible/overview` | Update overview |
-| `PATCH` | `/creator/projects/:projectId/story-bible/ending` | Update ending plan |
-| `PATCH` | `/creator/projects/:projectId/story-bible/document` | Update editor document |
-| `POST` | `/creator/projects/:projectId/story-bible/versions` | Save version snapshot |
-| `POST` | `/creator/projects/:projectId/story-bible/versions/:versionId/restore` | Restore version |
-| `POST` | `/creator/projects/:projectId/story-bible/extract-episodes/preview` | Preview parsed episodes/scenes from document |
-| `POST` | `/creator/projects/:projectId/story-bible/extract-episodes` | Create/update episodes and scenes from document |
-| `GET` | `/creator/projects/:projectId/story-bible/composer/status` | Story composer pipeline status |
-| `POST` | `/creator/projects/:projectId/story-bible/composer/compose` | Generate story from premise (Claude) |
-| `POST` | `/creator/projects/:projectId/story-bible/composer/expand-episodes` | Add episodes and sync summary |
-| `POST` | `/creator/projects/:projectId/story-bible/composer/sync-summary` | Rewrite story bible summary from DB state |
+| Method  | Path                                                                   | Description                                     |
+| ------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
+| `GET`   | `/creator/projects/:projectId/story-bible`                             | Full story bible document                       |
+| `PATCH` | `/creator/projects/:projectId/story-bible/overview`                    | Update overview                                 |
+| `PATCH` | `/creator/projects/:projectId/story-bible/ending`                      | Update ending plan                              |
+| `PATCH` | `/creator/projects/:projectId/story-bible/document`                    | Update editor document                          |
+| `POST`  | `/creator/projects/:projectId/story-bible/versions`                    | Save version snapshot                           |
+| `POST`  | `/creator/projects/:projectId/story-bible/versions/:versionId/restore` | Restore version                                 |
+| `POST`  | `/creator/projects/:projectId/story-bible/extract-episodes/preview`    | Preview parsed episodes/scenes from document    |
+| `POST`  | `/creator/projects/:projectId/story-bible/extract-episodes`            | Create/update episodes and scenes from document |
+| `GET`   | `/creator/projects/:projectId/story-bible/composer/status`             | Story composer pipeline status                  |
+| `POST`  | `/creator/projects/:projectId/story-bible/composer/compose`            | Generate story from premise (Claude)            |
+| `POST`  | `/creator/projects/:projectId/story-bible/composer/expand-episodes`    | Add episodes and sync summary                   |
+| `POST`  | `/creator/projects/:projectId/story-bible/composer/sync-summary`       | Rewrite story bible summary from DB state       |
 
 **`GET` response `data`:** `StoryBible`
 
@@ -362,19 +362,19 @@ Video generation is blocked until every scene has a description of at least 40 c
 
 ## Episode Planner (`/creator/projects/:projectId/episodes`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/episodes/summary` | Planner KPIs |
-| `GET` | `/creator/projects/:projectId/episodes` | List episodes |
-| `GET` | `/creator/projects/:projectId/episodes/:episodeId` | Episode + scenes |
-| `POST` | `/creator/projects/:projectId/episodes/generate` | AI-generate episodes |
-| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId` | Update episode |
-| `POST` | `/creator/projects/:projectId/episodes/:episodeId/cliffhanger/generate` | AI cliffhanger |
-| `POST` | `/creator/projects/:projectId/episodes/:episodeId/scenes` | Create scene |
-| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId/scenes/reorder` | Reorder scenes |
-| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId/scenes/:sceneId/video/select` | Set active scene video version |
-| `POST` | `/creator/projects/:projectId/episodes/:episodeId/assemble` | FFmpeg concat scene videos → episode MP4 |
-| `GET` | `/creator/projects/:projectId/episodes/:episodeId/assembled-video` | Stream assembled episode MP4 (Bearer auth) |
+| Method  | Path                                                                            | Description                                |
+| ------- | ------------------------------------------------------------------------------- | ------------------------------------------ |
+| `GET`   | `/creator/projects/:projectId/episodes/summary`                                 | Planner KPIs                               |
+| `GET`   | `/creator/projects/:projectId/episodes`                                         | List episodes                              |
+| `GET`   | `/creator/projects/:projectId/episodes/:episodeId`                              | Episode + scenes                           |
+| `POST`  | `/creator/projects/:projectId/episodes/generate`                                | AI-generate episodes                       |
+| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId`                              | Update episode                             |
+| `POST`  | `/creator/projects/:projectId/episodes/:episodeId/cliffhanger/generate`         | AI cliffhanger                             |
+| `POST`  | `/creator/projects/:projectId/episodes/:episodeId/scenes`                       | Create scene                               |
+| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId/scenes/reorder`               | Reorder scenes                             |
+| `PATCH` | `/creator/projects/:projectId/episodes/:episodeId/scenes/:sceneId/video/select` | Set active scene video version             |
+| `POST`  | `/creator/projects/:projectId/episodes/:episodeId/assemble`                     | FFmpeg concat scene videos → episode MP4   |
+| `GET`   | `/creator/projects/:projectId/episodes/:episodeId/assembled-video`              | Stream assembled episode MP4 (Bearer auth) |
 
 See [EPISODE_ASSEMBLY.md](./EPISODE_ASSEMBLY.md) for FFmpeg deployment, storage, and troubleshooting.
 
@@ -428,10 +428,10 @@ See [EPISODE_ASSEMBLY.md](./EPISODE_ASSEMBLY.md) for FFmpeg deployment, storage,
 
 ## AI Settings (`/creator/ai/settings`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/ai/settings` | User AI model preferences + catalog |
-| `PUT` | `/creator/ai/settings` | Update enabled models, auto/manual mode, fallbacks |
+| Method | Path                   | Description                                        |
+| ------ | ---------------------- | -------------------------------------------------- |
+| `GET`  | `/creator/ai/settings` | User AI model preferences + catalog                |
+| `PUT`  | `/creator/ai/settings` | Update enabled models, auto/manual mode, fallbacks |
 
 **`PUT` body:** `{ selectionMode: 'auto'|'manual', enabledModels: string[], manualSelections: {}, fallbackEnabled: boolean }`
 
@@ -441,18 +441,18 @@ Only **enabled** models with configured API keys are used for generation. Auto m
 
 ## AI Generation (`/creator/projects/:projectId/ai`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/ai/director` | AI director dashboard |
-| `GET` | `/creator/projects/:projectId/ai/agents/:agentId` | Single agent detail |
-| `POST` | `/creator/projects/:projectId/ai/agents/run` | Run one agent (optionally scoped to scene(s)) |
-| `POST` | `/creator/projects/:projectId/ai/agents/run-batch` | Queue agent for multiple scenes |
-| `GET` | `/creator/projects/:projectId/ai/scene-preview` | Scene context preview for agents |
-| `POST` | `/creator/projects/:projectId/ai/pipeline/run` | Run full pipeline |
-| `GET` | `/creator/projects/:projectId/ai/prompts/templates` | Prompt templates |
-| `POST` | `/creator/projects/:projectId/ai/prompts/build` | Build prompt |
-| `GET` | `/creator/projects/:projectId/ai/cost` | Cost estimate |
-| `GET` | `/creator/projects/:projectId/ai/logs` | Agent logs |
+| Method | Path                                                | Description                                   |
+| ------ | --------------------------------------------------- | --------------------------------------------- |
+| `GET`  | `/creator/projects/:projectId/ai/director`          | AI director dashboard                         |
+| `GET`  | `/creator/projects/:projectId/ai/agents/:agentId`   | Single agent detail                           |
+| `POST` | `/creator/projects/:projectId/ai/agents/run`        | Run one agent (optionally scoped to scene(s)) |
+| `POST` | `/creator/projects/:projectId/ai/agents/run-batch`  | Queue agent for multiple scenes               |
+| `GET`  | `/creator/projects/:projectId/ai/scene-preview`     | Scene context preview for agents              |
+| `POST` | `/creator/projects/:projectId/ai/pipeline/run`      | Run full pipeline                             |
+| `GET`  | `/creator/projects/:projectId/ai/prompts/templates` | Prompt templates                              |
+| `POST` | `/creator/projects/:projectId/ai/prompts/build`     | Build prompt                                  |
+| `GET`  | `/creator/projects/:projectId/ai/cost`              | Cost estimate                                 |
+| `GET`  | `/creator/projects/:projectId/ai/logs`              | Agent logs                                    |
 
 **`POST .../agents/run` body**
 
@@ -495,19 +495,19 @@ Video agent (`agentId: video`) calls **Grok Imagine** when `XAI_API_KEY` is set:
 
 ## Rendering (`/creator/projects/:projectId/rendering`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/rendering/overview` | Progress dashboard |
-| `GET` | `/creator/projects/:projectId/rendering/queue` | Active render queue |
-| `GET` | `/creator/projects/:projectId/rendering/retry-queue` | Failed/retry queue |
-| `GET` | `/creator/projects/:projectId/rendering/workers` | Worker nodes |
-| `GET` | `/creator/projects/:projectId/rendering/gpu` | GPU status |
-| `GET` | `/creator/projects/:projectId/rendering/ffmpeg` | FFmpeg job details |
-| `GET` | `/creator/projects/:projectId/rendering/history` | Completed jobs |
-| `GET` | `/creator/projects/:projectId/rendering/monitoring` | Queue metrics |
-| `POST` | `/creator/projects/:projectId/rendering/retry` | Retry failed job |
-| `POST` | `/creator/projects/:projectId/rendering/cancel` | Cancel job |
-| `GET` | `/creator/projects/:projectId/rendering/jobs/:jobId` | Single job detail |
+| Method | Path                                                 | Description         |
+| ------ | ---------------------------------------------------- | ------------------- |
+| `GET`  | `/creator/projects/:projectId/rendering/overview`    | Progress dashboard  |
+| `GET`  | `/creator/projects/:projectId/rendering/queue`       | Active render queue |
+| `GET`  | `/creator/projects/:projectId/rendering/retry-queue` | Failed/retry queue  |
+| `GET`  | `/creator/projects/:projectId/rendering/workers`     | Worker nodes        |
+| `GET`  | `/creator/projects/:projectId/rendering/gpu`         | GPU status          |
+| `GET`  | `/creator/projects/:projectId/rendering/ffmpeg`      | FFmpeg job details  |
+| `GET`  | `/creator/projects/:projectId/rendering/history`     | Completed jobs      |
+| `GET`  | `/creator/projects/:projectId/rendering/monitoring`  | Queue metrics       |
+| `POST` | `/creator/projects/:projectId/rendering/retry`       | Retry failed job    |
+| `POST` | `/creator/projects/:projectId/rendering/cancel`      | Cancel job          |
+| `GET`  | `/creator/projects/:projectId/rendering/jobs/:jobId` | Single job detail   |
 
 **`POST .../retry` body:** `{ "jobId": "string" }`  
 **`POST .../cancel` body:** `{ "jobId": "string" }`  
@@ -520,17 +520,17 @@ See `src/types/rendering.types.ts` for `RenderingOverview`, `RenderWorker`, `Gpu
 
 ## Publishing (`/creator/projects/:projectId/publishing`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/publishing/overview` | Publish wizard overview |
-| `GET` | `/creator/projects/:projectId/publishing/settings` | Publish settings |
-| `PUT` | `/creator/projects/:projectId/publishing/settings` | Update settings |
-| `GET` | `/creator/projects/:projectId/publishing/schedule` | Release schedule |
-| `POST` | `/creator/projects/:projectId/publishing/schedule` | Schedule release |
-| `GET` | `/creator/projects/:projectId/publishing/hls` | HLS packages |
-| `GET` | `/creator/publishing/categories` | Global category list |
-| `GET` | `/creator/projects/:projectId/publishing/notifications/preview` | Push notification preview |
-| `POST` | `/creator/projects/:projectId/publishing/publish` | Publish project/episodes |
+| Method | Path                                                            | Description               |
+| ------ | --------------------------------------------------------------- | ------------------------- |
+| `GET`  | `/creator/projects/:projectId/publishing/overview`              | Publish wizard overview   |
+| `GET`  | `/creator/projects/:projectId/publishing/settings`              | Publish settings          |
+| `PUT`  | `/creator/projects/:projectId/publishing/settings`              | Update settings           |
+| `GET`  | `/creator/projects/:projectId/publishing/schedule`              | Release schedule          |
+| `POST` | `/creator/projects/:projectId/publishing/schedule`              | Schedule release          |
+| `GET`  | `/creator/projects/:projectId/publishing/hls`                   | HLS packages              |
+| `GET`  | `/creator/publishing/categories`                                | Global category list      |
+| `GET`  | `/creator/projects/:projectId/publishing/notifications/preview` | Push notification preview |
+| `POST` | `/creator/projects/:projectId/publishing/publish`               | Publish project/episodes  |
 
 **`PUT .../settings` body:** partial `PublishSettings` — visibility, tags, categories, monetization, etc.
 
@@ -553,19 +553,19 @@ See `src/types/rendering.types.ts` for `RenderingOverview`, `RenderWorker`, `Gpu
 
 ## Analytics (`/creator/projects/:projectId/analytics`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/creator/projects/:projectId/analytics/overview` | Dashboard overview |
-| `GET` | `/creator/projects/:projectId/analytics/revenue` | Revenue metrics |
-| `GET` | `/creator/projects/:projectId/analytics/earnings` | Creator earnings |
-| `GET` | `/creator/projects/:projectId/analytics/watch-time` | Watch time |
-| `GET` | `/creator/projects/:projectId/analytics/completion` | Completion rates |
-| `GET` | `/creator/projects/:projectId/analytics/ai-cost` | AI spend |
-| `GET` | `/creator/projects/:projectId/analytics/render-cost` | Render spend |
-| `GET` | `/creator/projects/:projectId/analytics/growth` | User growth |
-| `GET` | `/creator/projects/:projectId/analytics/retention` | Retention curves |
-| `GET` | `/creator/projects/:projectId/analytics/cohorts` | Cohort analysis |
-| `POST` | `/creator/projects/:projectId/analytics/export` | Export report |
+| Method | Path                                                 | Description        |
+| ------ | ---------------------------------------------------- | ------------------ |
+| `GET`  | `/creator/projects/:projectId/analytics/overview`    | Dashboard overview |
+| `GET`  | `/creator/projects/:projectId/analytics/revenue`     | Revenue metrics    |
+| `GET`  | `/creator/projects/:projectId/analytics/earnings`    | Creator earnings   |
+| `GET`  | `/creator/projects/:projectId/analytics/watch-time`  | Watch time         |
+| `GET`  | `/creator/projects/:projectId/analytics/completion`  | Completion rates   |
+| `GET`  | `/creator/projects/:projectId/analytics/ai-cost`     | AI spend           |
+| `GET`  | `/creator/projects/:projectId/analytics/render-cost` | Render spend       |
+| `GET`  | `/creator/projects/:projectId/analytics/growth`      | User growth        |
+| `GET`  | `/creator/projects/:projectId/analytics/retention`   | Retention curves   |
+| `GET`  | `/creator/projects/:projectId/analytics/cohorts`     | Cohort analysis    |
+| `POST` | `/creator/projects/:projectId/analytics/export`      | Export report      |
 
 **`POST .../export` body**
 
@@ -588,24 +588,24 @@ See `src/types/analytics.types.ts` for metric shapes (`AnalyticsOverview`, `Reve
 
 All routes require `role: admin`.
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/overview` | Platform overview |
-| `GET` | `/admin/users` | User list |
-| `PUT` | `/admin/users/status` | Update user status |
-| `GET` | `/admin/creators` | Creator list |
-| `PUT` | `/admin/creators/status` | Update creator status |
-| `GET` | `/admin/moderation` | Moderation queue |
-| `POST` | `/admin/moderation/action` | Approve/reject item |
-| `GET` | `/admin/ai-usage` | AI usage metrics |
-| `GET` | `/admin/subscriptions` | Subscription metrics |
-| `GET` | `/admin/rewarded-ads` | Rewarded ads metrics |
-| `GET` | `/admin/coins` | Coin economy metrics |
-| `GET` | `/admin/reports` | Platform reports |
-| `GET` | `/admin/audit-logs` | Audit log entries |
-| `GET` | `/admin/feature-flags` | Feature flags |
-| `PUT` | `/admin/feature-flags` | Toggle feature flag |
-| `GET` | `/admin/system-health` | Service health |
+| Method | Path                       | Description           |
+| ------ | -------------------------- | --------------------- |
+| `GET`  | `/admin/overview`          | Platform overview     |
+| `GET`  | `/admin/users`             | User list             |
+| `PUT`  | `/admin/users/status`      | Update user status    |
+| `GET`  | `/admin/creators`          | Creator list          |
+| `PUT`  | `/admin/creators/status`   | Update creator status |
+| `GET`  | `/admin/moderation`        | Moderation queue      |
+| `POST` | `/admin/moderation/action` | Approve/reject item   |
+| `GET`  | `/admin/ai-usage`          | AI usage metrics      |
+| `GET`  | `/admin/subscriptions`     | Subscription metrics  |
+| `GET`  | `/admin/rewarded-ads`      | Rewarded ads metrics  |
+| `GET`  | `/admin/coins`             | Coin economy metrics  |
+| `GET`  | `/admin/reports`           | Platform reports      |
+| `GET`  | `/admin/audit-logs`        | Audit log entries     |
+| `GET`  | `/admin/feature-flags`     | Feature flags         |
+| `PUT`  | `/admin/feature-flags`     | Toggle feature flag   |
+| `GET`  | `/admin/system-health`     | Service health        |
 
 **`PUT /admin/users/status` body:** `{ userId, status }`  
 **`PUT /admin/creators/status` body:** `{ creatorId, status }`  
@@ -619,18 +619,18 @@ See `src/types/admin-portal.types.ts` for full entity shapes.
 
 ## Endpoint summary
 
-| Module | Count |
-|--------|------:|
-| Authentication | 11 |
-| Creator studio | 16 |
-| Story bible | 6 |
-| Episode planner | 8 |
-| AI generation | 8 |
-| Rendering | 11 |
-| Publishing | 9 |
-| Analytics | 11 |
-| Admin | 16 |
-| **Total** | **96** |
+| Module          |  Count |
+| --------------- | -----: |
+| Authentication  |     11 |
+| Creator studio  |     16 |
+| Story bible     |      6 |
+| Episode planner |      8 |
+| AI generation   |      8 |
+| Rendering       |     11 |
+| Publishing      |      9 |
+| Analytics       |     11 |
+| Admin           |     16 |
+| **Total**       | **96** |
 
 ---
 
@@ -638,28 +638,28 @@ See `src/types/admin-portal.types.ts` for full entity shapes.
 
 ### Priority order (suggested)
 
-1. **Auth** — login, session, refresh, register, onboarding  
-2. **Creator projects** — CRUD projects, series, seasons  
-3. **Episode planner** — episodes, scenes  
-4. **Story bible** — read/write bible document  
-5. **AI generation & rendering** — job queue integration  
-6. **Publishing & analytics** — read-heavy dashboards  
-7. **Admin portal** — admin-only operations  
+1. **Auth** — login, session, refresh, register, onboarding
+2. **Creator projects** — CRUD projects, series, seasons
+3. **Episode planner** — episodes, scenes
+4. **Story bible** — read/write bible document
+5. **AI generation & rendering** — job queue integration
+6. **Publishing & analytics** — read-heavy dashboards
+7. **Admin portal** — admin-only operations
 
 ### Frontend type references
 
-| Domain | TypeScript types |
-|--------|------------------|
-| Auth | `src/types/auth.types.ts` |
-| Creator | `src/types/creator.types.ts` |
-| Story bible | `src/types/story-bible.types.ts` |
-| Episodes | `src/types/episode-planner.types.ts` |
-| AI | `src/types/ai-generation.types.ts` |
-| Rendering | `src/types/rendering.types.ts` |
-| Publishing | `src/types/publishing.types.ts` |
-| Analytics | `src/types/analytics.types.ts` |
-| Admin | `src/types/admin-portal.types.ts` |
-| API envelope | `src/types/api.types.ts` |
+| Domain       | TypeScript types                     |
+| ------------ | ------------------------------------ |
+| Auth         | `src/types/auth.types.ts`            |
+| Creator      | `src/types/creator.types.ts`         |
+| Story bible  | `src/types/story-bible.types.ts`     |
+| Episodes     | `src/types/episode-planner.types.ts` |
+| AI           | `src/types/ai-generation.types.ts`   |
+| Rendering    | `src/types/rendering.types.ts`       |
+| Publishing   | `src/types/publishing.types.ts`      |
+| Analytics    | `src/types/analytics.types.ts`       |
+| Admin        | `src/types/admin-portal.types.ts`    |
+| API envelope | `src/types/api.types.ts`             |
 
 ### API keys & cost projections
 
@@ -686,6 +686,6 @@ GET /health
 
 ## Changelog
 
-| Date | Notes |
-|------|-------|
+| Date       | Notes                                         |
+| ---------- | --------------------------------------------- |
 | 2026-07-27 | Initial spec generated from frontend services |

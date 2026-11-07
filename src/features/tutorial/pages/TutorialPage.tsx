@@ -117,7 +117,7 @@ export function TutorialPage() {
           live UI.
         </p>
 
-        <figure className="overflow-hidden rounded-xl border bg-background shadow-sm">
+        <figure className="bg-background overflow-hidden rounded-xl border shadow-sm">
           <img
             src="/tutorial/project-workflow.png"
             alt="Project workflow bar showing Story Bible, Episodes, AI Generation, Rendering, Publishing, and Analytics tabs for Halo Dark Secret"

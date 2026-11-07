@@ -83,7 +83,10 @@ export function ReleaseSchedulerPanel({ projectId, schedule }: ReleaseSchedulerP
           ) : (
             <div className="space-y-3">
               {schedule.map((item) => (
-                <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                <div
+                  key={item.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"
+                >
                   <div>
                     <p className="font-medium">{item.episodeTitle}</p>
                     <p className="text-muted-foreground text-xs">

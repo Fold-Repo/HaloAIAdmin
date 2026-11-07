@@ -9,10 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { SceneAiPreviewPanel } from '@/features/ai-generation/components/SceneAiPreviewPanel';
-import {
-  AGENT_STATUS_LABELS,
-  formatUsd,
-} from '@/features/ai-generation/utils/ai-generation.utils';
+import { AGENT_STATUS_LABELS, formatUsd } from '@/features/ai-generation/utils/ai-generation.utils';
 import { useModelsForAgent } from '@/features/ai-generation/hooks/useAiSettings';
 import { useRunAgent } from '@/features/ai-generation/hooks/useAiGeneration';
 import { ROUTES } from '@/constants';

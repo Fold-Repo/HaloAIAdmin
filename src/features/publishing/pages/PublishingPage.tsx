@@ -111,7 +111,11 @@ export function PublishingPage() {
       <PublishingNav />
 
       {section === 'wizard' && overviewQuery.data && (
-        <PublishWizardPanel projectId={projectId} overview={overviewQuery.data} />
+        <PublishWizardPanel
+          projectId={projectId}
+          projectTitle={project.title}
+          overview={overviewQuery.data}
+        />
       )}
 
       {section === 'scheduler' && scheduleQuery.data && (
@@ -128,9 +132,7 @@ export function PublishingPage() {
         />
       )}
 
-      {section === 'tags' && settings && (
-        <TagsPanel projectId={projectId} settings={settings} />
-      )}
+      {section === 'tags' && settings && <TagsPanel projectId={projectId} settings={settings} />}
 
       {section === 'visibility' && settings && (
         <VisibilityPanel projectId={projectId} settings={settings} />

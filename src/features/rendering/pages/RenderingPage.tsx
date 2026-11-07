@@ -26,10 +26,7 @@ import {
   useRenderingOverview,
   useRetryQueue,
 } from '@/features/rendering/hooks/useRendering';
-import {
-  getRenderingPath,
-  isRenderingSection,
-} from '@/features/rendering/utils/rendering.utils';
+import { getRenderingPath, isRenderingSection } from '@/features/rendering/utils/rendering.utils';
 import { useProject } from '@/features/creator/hooks/useCreatorQueries';
 import { ROUTES } from '@/constants';
 import { combineQueryState } from '@/utils';
@@ -135,13 +132,9 @@ export function RenderingPage() {
 
       {section === 'gpu' && gpuQuery.data && <GpuStatusPanel gpus={gpuQuery.data} />}
 
-      {section === 'ffmpeg' && ffmpegQuery.data && (
-        <FfmpegJobPanel jobs={ffmpegQuery.data} />
-      )}
+      {section === 'ffmpeg' && ffmpegQuery.data && <FfmpegJobPanel jobs={ffmpegQuery.data} />}
 
-      {section === 'history' && historyQuery.data && (
-        <JobHistoryPanel jobs={historyQuery.data} />
-      )}
+      {section === 'history' && historyQuery.data && <JobHistoryPanel jobs={historyQuery.data} />}
 
       {section === 'monitoring' && monitoringQuery.data && (
         <QueueMonitoringPanel metrics={monitoringQuery.data} />

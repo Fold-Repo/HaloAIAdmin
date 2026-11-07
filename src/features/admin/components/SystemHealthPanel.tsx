@@ -36,7 +36,9 @@ export function SystemHealthPanel({ health }: { health: SystemHealthStatus }) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-base">{service.name}</CardTitle>
-                <Badge variant={statusVariant(service.status)}>{HEALTH_LABELS[service.status]}</Badge>
+                <Badge variant={statusVariant(service.status)}>
+                  {HEALTH_LABELS[service.status]}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>

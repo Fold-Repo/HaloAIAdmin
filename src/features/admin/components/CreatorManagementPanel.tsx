@@ -73,7 +73,8 @@ export function CreatorManagementPanel({ creators }: { creators: AdminCreator[] 
           </table>
         </div>
         <p className="text-muted-foreground mt-3 text-xs">
-          Joined dates range from {formatRelativeDate(creators[0]?.joinedAt ?? new Date().toISOString())}
+          Joined dates range from{' '}
+          {formatRelativeDate(creators[0]?.joinedAt ?? new Date().toISOString())}
         </p>
       </CardContent>
     </Card>

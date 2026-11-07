@@ -5,10 +5,7 @@ import { Film, GripVertical, MapPin, RefreshCw, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SceneVideoVersions } from '@/features/ai-generation/components/SceneVideoVersions';
-import {
-  getSceneVideos,
-  sceneHasVideos,
-} from '@/features/ai-generation/utils/scene-video.utils';
+import { getSceneVideos, sceneHasVideos } from '@/features/ai-generation/utils/scene-video.utils';
 import {
   SCENE_STATUS_LABELS,
   formatRuntime,

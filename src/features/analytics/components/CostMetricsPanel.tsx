@@ -25,10 +25,7 @@ export function CostMetricsPanel({ title, metrics }: CostMetricsPanelProps) {
           <CardTitle className="text-base">Cost trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <MetricLineChart
-            data={metrics.series}
-            valueFormatter={(value) => formatUsd(value)}
-          />
+          <MetricLineChart data={metrics.series} valueFormatter={(value) => formatUsd(value)} />
         </CardContent>
       </Card>
 
@@ -39,7 +36,10 @@ export function CostMetricsPanel({ title, metrics }: CostMetricsPanelProps) {
         <CardContent>
           <div className="space-y-3">
             {metrics.byCategory.map((item) => (
-              <div key={item.label} className="flex items-center justify-between rounded-lg border p-3">
+              <div
+                key={item.label}
+                className="flex items-center justify-between rounded-lg border p-3"
+              >
                 <span className="text-sm">{item.label}</span>
                 <span className="font-medium">{formatUsd(item.amountUsd)}</span>
               </div>

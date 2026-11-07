@@ -19,19 +19,19 @@ Requires **Node.js ≥ 20** (see `.nvmrc`).
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Type-check and production build |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format with Prettier |
-| `npm run test` | Run Vitest in watch mode |
-| `npm run test:run` | Run unit + integration tests |
-| `npm run test:integration` | Run integration tests only |
-| `npm run test:coverage` | Run tests with coverage report |
-| `npm run test:e2e` | Run Playwright E2E + accessibility tests |
-| `npm run test:all` | Run Vitest and Playwright |
+| Command                    | Description                              |
+| -------------------------- | ---------------------------------------- |
+| `npm run dev`              | Start Vite dev server                    |
+| `npm run build`            | Type-check and production build          |
+| `npm run preview`          | Preview production build                 |
+| `npm run lint`             | Run ESLint                               |
+| `npm run format`           | Format with Prettier                     |
+| `npm run test`             | Run Vitest in watch mode                 |
+| `npm run test:run`         | Run unit + integration tests             |
+| `npm run test:integration` | Run integration tests only               |
+| `npm run test:coverage`    | Run tests with coverage report           |
+| `npm run test:e2e`         | Run Playwright E2E + accessibility tests |
+| `npm run test:all`         | Run Vitest and Playwright                |
 
 ## Project structure
 
@@ -45,21 +45,23 @@ docs/
 └── ARCHITECTURE.md
 src/                  # React frontend
 ```
+
 src/
-├── app/              # App shell
-├── api/              # Axios client
-├── components/       # Shared UI (ErrorBoundary, SkipToContent, shadcn)
-├── features/         # Feature modules (auth, creator, story-bible, …)
-├── layouts/          # MainLayout, CreatorLayout, AuthLayout
-├── monitoring/       # Error reporting and web vitals
-├── routes/           # Lazy-loaded React Router config
+├── app/ # App shell
+├── api/ # Axios client
+├── components/ # Shared UI (ErrorBoundary, SkipToContent, shadcn)
+├── features/ # Feature modules (auth, creator, story-bible, …)
+├── layouts/ # MainLayout, CreatorLayout, AuthLayout
+├── monitoring/ # Error reporting and web vitals
+├── routes/ # Lazy-loaded React Router config
 ├── tests/
-│   ├── unit/         # Vitest unit tests
-│   ├── integration/  # Vitest integration tests
-│   └── e2e/          # Playwright E2E + axe accessibility
-k8s/                  # Kubernetes manifests
-.github/workflows/    # CI and release pipelines
-```
+│ ├── unit/ # Vitest unit tests
+│ ├── integration/ # Vitest integration tests
+│ └── e2e/ # Playwright E2E + axe accessibility
+k8s/ # Kubernetes manifests
+.github/workflows/ # CI and release pipelines
+
+````
 
 ## Production readiness
 
@@ -94,7 +96,7 @@ See `.env.example`:
 VITE_APP_NAME=AI Creator Studio
 VITE_API_BASE_URL=http://localhost:3000/api
 VITE_AUTH_TOKEN_KEY=ai_creator_auth_token
-```
+````
 
 ## Docker
 
@@ -141,17 +143,17 @@ npm run test:e2e          # Playwright (starts dev server)
 
 ## Feature modules
 
-| Module | Route pattern |
-|--------|---------------|
-| Authentication | `/login`, `/register`, … |
-| Creator Studio | `/dashboard`, `/studio/projects` |
-| Story Bible | `/studio/projects/:id/story-bible/:section` |
-| Episode Planner | `/studio/projects/:id/episodes` |
-| AI Generation | `/studio/projects/:id/ai/:section` |
-| Rendering | `/studio/projects/:id/rendering/:section` |
-| Publishing | `/studio/projects/:id/publishing/:section` |
-| Analytics | `/studio/projects/:id/analytics/:section` |
-| Admin Portal | `/admin/:section` |
+| Module          | Route pattern                               |
+| --------------- | ------------------------------------------- |
+| Authentication  | `/login`, `/register`, …                    |
+| Creator Studio  | `/dashboard`, `/studio/projects`            |
+| Story Bible     | `/studio/projects/:id/story-bible/:section` |
+| Episode Planner | `/studio/projects/:id/episodes`             |
+| AI Generation   | `/studio/projects/:id/ai/:section`          |
+| Rendering       | `/studio/projects/:id/rendering/:section`   |
+| Publishing      | `/studio/projects/:id/publishing/:section`  |
+| Analytics       | `/studio/projects/:id/analytics/:section`   |
+| Admin Portal    | `/admin/:section`                           |
 
 Dev mode uses mock API fallbacks when the backend is unavailable.
 
@@ -174,11 +176,11 @@ docker compose --profile full up --build
 
 ## Tech stack
 
-| Category | Tools |
-|----------|-------|
-| Core | React 19, TypeScript, Vite |
-| Styling | Tailwind CSS, shadcn/ui, Radix UI |
-| State | Zustand, TanStack Query |
-| Testing | Vitest, React Testing Library, Playwright, axe |
-| Quality | ESLint, Prettier, Husky, GitHub Actions |
-| Deploy | Docker, nginx, Kubernetes |
+| Category | Tools                                          |
+| -------- | ---------------------------------------------- |
+| Core     | React 19, TypeScript, Vite                     |
+| Styling  | Tailwind CSS, shadcn/ui, Radix UI              |
+| State    | Zustand, TanStack Query                        |
+| Testing  | Vitest, React Testing Library, Playwright, axe |
+| Quality  | ESLint, Prettier, Husky, GitHub Actions        |
+| Deploy   | Docker, nginx, Kubernetes                      |
