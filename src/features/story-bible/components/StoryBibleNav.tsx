@@ -1,6 +1,9 @@
 import { NavLink, useParams } from 'react-router-dom';
 
-import { STORY_BIBLE_SECTIONS, getStoryBiblePath } from '@/features/story-bible/utils/story-bible.utils';
+import {
+  STORY_BIBLE_SECTIONS,
+  getStoryBiblePath,
+} from '@/features/story-bible/utils/story-bible.utils';
 import { cn } from '@/utils';
 import type { StoryBibleSection } from '@/types';
 

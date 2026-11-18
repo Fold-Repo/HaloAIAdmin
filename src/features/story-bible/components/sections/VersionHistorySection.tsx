@@ -62,7 +62,7 @@ export function VersionHistorySection({ projectId, versions }: VersionHistorySec
           </div>
           {selected && (
             <EntityCard title={selected.label} subtitle={`By ${selected.author}`}>
-              <pre className="max-h-96 overflow-auto whitespace-pre-wrap text-xs">
+              <pre className="max-h-96 overflow-auto text-xs whitespace-pre-wrap">
                 {selected.content}
               </pre>
             </EntityCard>

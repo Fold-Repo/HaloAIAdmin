@@ -70,9 +70,7 @@ export function UserManagementPanel({ users }: { users: AdminUser[] }) {
                         variant="ghost"
                         size="sm"
                         disabled={updateStatus.isPending}
-                        onClick={() =>
-                          updateStatus.mutate({ userId: user.id, status: 'active' })
-                        }
+                        onClick={() => updateStatus.mutate({ userId: user.id, status: 'active' })}
                       >
                         Activate
                       </Button>

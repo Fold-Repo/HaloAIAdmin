@@ -7,15 +7,7 @@ export const runAgentSchema = z.object({
 });
 
 export const promptBuilderSchema = z.object({
-  agentId: z.enum([
-    'story-planner',
-    'script',
-    'character',
-    'video',
-    'voice',
-    'subtitle',
-    'music',
-  ]),
+  agentId: z.enum(['story-planner', 'script', 'character', 'video', 'voice', 'subtitle', 'music']),
   basePrompt: z.string().min(10, 'Base prompt is required'),
   style: z.string().min(2, 'Style is required'),
   constraints: z.string().min(2, 'Constraints are required'),

@@ -46,7 +46,10 @@ export function CoinEconomyPanel({ metrics }: { metrics: CoinEconomyMetrics }) {
         </CardHeader>
         <CardContent className="space-y-3">
           {metrics.topPackages.map((pkg) => (
-            <div key={pkg.label} className="flex items-center justify-between rounded-lg border p-3">
+            <div
+              key={pkg.label}
+              className="flex items-center justify-between rounded-lg border p-3"
+            >
               <div>
                 <p className="font-medium">{pkg.label}</p>
                 <p className="text-muted-foreground text-xs">{formatNumber(pkg.sales)} sales</p>

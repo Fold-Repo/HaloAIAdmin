@@ -237,7 +237,7 @@ export function EpisodePlanTools({ projectId }: EpisodePlanToolsProps) {
                   id="expand-target"
                   type="number"
                   min={Math.max(planned, available) + 1}
-                  max={30}
+                  max={50}
                   placeholder={String(Math.max(planned, available) + 1)}
                   value={targetCount}
                   onChange={(e) => {

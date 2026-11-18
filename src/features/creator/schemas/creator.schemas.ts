@@ -8,7 +8,7 @@ export const projectWizardSchema = z
     genre: z.string().min(2, 'Select a genre'),
     targetFormat: z.enum(['vertical-short', 'vertical-series', 'horizontal']),
     episodeLength: z.coerce.number().min(15).max(180),
-    episodeCount: z.coerce.number().min(1).max(24),
+    episodeCount: z.coerce.number().min(1).max(50),
     assignmentMode: z.enum(['standalone', 'existing', 'new-series']),
     seriesId: z.string().optional(),
     seasonId: z.string().optional(),

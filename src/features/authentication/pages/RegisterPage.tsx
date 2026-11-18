@@ -41,12 +41,7 @@ export function RegisterPage() {
       description="Start building AI-powered content in minutes."
       footer={
         <div className="w-full space-y-4">
-          <Button
-            type="submit"
-            form="register-form"
-            className="w-full"
-            disabled={isPending}
-          >
+          <Button type="submit" form="register-form" className="w-full" disabled={isPending}>
             {isPending ? 'Creating account...' : 'Create account'}
           </Button>
           <AuthLink prompt="Already have an account?" linkText="Sign in" to={ROUTES.LOGIN} />

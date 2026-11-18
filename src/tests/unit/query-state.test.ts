@@ -21,10 +21,7 @@ function mockQuery(
 
 describe('combineQueryState', () => {
   it('returns loading when any query is loading', () => {
-    const state = combineQueryState([
-      mockQuery(),
-      mockQuery({ isLoading: true }),
-    ]);
+    const state = combineQueryState([mockQuery(), mockQuery({ isLoading: true })]);
 
     expect(state.isLoading).toBe(true);
     expect(state.isError).toBe(false);
@@ -32,10 +29,7 @@ describe('combineQueryState', () => {
 
   it('returns error when any query failed', () => {
     const error = new Error('Network error');
-    const state = combineQueryState([
-      mockQuery(),
-      mockQuery({ isError: true, error }),
-    ]);
+    const state = combineQueryState([mockQuery(), mockQuery({ isError: true, error })]);
 
     expect(state.isError).toBe(true);
     expect(state.error).toBe(error);

@@ -1,7 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUpdatePublishSettings } from '@/features/publishing/hooks/usePublishing';
-import { VISIBILITY_LABELS, VISIBILITY_OPTIONS } from '@/features/publishing/utils/publishing.utils';
+import {
+  VISIBILITY_LABELS,
+  VISIBILITY_OPTIONS,
+} from '@/features/publishing/utils/publishing.utils';
 import type { PublishSettings } from '@/types';
 
 type VisibilityPanelProps = {

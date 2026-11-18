@@ -12,9 +12,7 @@ import {
 describe('publishing utils', () => {
   it('builds publishing paths', () => {
     expect(getPublishingPath('proj-1')).toBe('/studio/projects/proj-1/publishing/wizard');
-    expect(getPublishingPath('proj-1', 'hls')).toBe(
-      '/studio/projects/proj-1/publishing/hls',
-    );
+    expect(getPublishingPath('proj-1', 'hls')).toBe('/studio/projects/proj-1/publishing/hls');
   });
 
   it('validates section ids', () => {

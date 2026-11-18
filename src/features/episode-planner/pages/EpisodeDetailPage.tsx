@@ -59,7 +59,10 @@ export function EpisodeDetailPage() {
           if (!cancelled) setPreviewUrl(assembledPath);
           return;
         }
-        const url = `${appConfig.api.baseUrl.replace(/\/$/, '')}${assembledPath.startsWith('/') ? '' : '/'}${assembledPath}`;
+        const version = episodeQuery.data?.assembledAt
+          ? `?v=${encodeURIComponent(episodeQuery.data.assembledAt)}`
+          : '';
+        const url = `${appConfig.api.baseUrl.replace(/\/$/, '')}${assembledPath.startsWith('/') ? '' : '/'}${assembledPath}${version}`;
         objectUrl = await fetchAuthenticatedBlob(url);
         if (!cancelled) setPreviewUrl(objectUrl);
       } catch {
@@ -72,7 +75,7 @@ export function EpisodeDetailPage() {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [episodeQuery.data?.assembledVideoUrl]);
+  }, [episodeQuery.data?.assembledVideoUrl, episodeQuery.data?.assembledAt]);
 
   if (episodeQuery.isLoading || projectQuery.isLoading) {
     return <LoadingScreen message="Loading episode..." />;

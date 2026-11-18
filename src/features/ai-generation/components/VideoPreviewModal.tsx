@@ -1,5 +1,7 @@
 import { Download, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
+import { fetchAuthenticatedBlob } from '@/api/client';
 import { StreamableVideo } from '@/components/common/StreamableVideo';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,12 +31,46 @@ export function VideoPreviewModal({
   downloadFilename,
 }: VideoPreviewModalProps) {
   const isHls = /\.m3u8(\?|$)/i.test(videoUrl);
+  const needsAuth = videoUrl.includes('/media/scene-videos/');
+  const [playableUrl, setPlayableUrl] = useState(needsAuth ? '' : videoUrl);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    if (!open) return;
+    if (!needsAuth) {
+      setPlayableUrl(videoUrl);
+      setLoadError('');
+      return;
+    }
+
+    let objectUrl = '';
+    let cancelled = false;
+    setPlayableUrl('');
+    setLoadError('');
+    void fetchAuthenticatedBlob(videoUrl)
+      .then((blobUrl) => {
+        if (cancelled) {
+          URL.revokeObjectURL(blobUrl);
+          return;
+        }
+        objectUrl = blobUrl;
+        setPlayableUrl(blobUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError('Could not load this scene video.');
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [needsAuth, open, videoUrl]);
 
   const handleDownload = async () => {
     const filename =
       downloadFilename ?? `${title.replace(/[^\w.-]+/g, '_')}${isHls ? '.m3u8' : '.mp4'}`;
-    if (videoUrl.startsWith('blob:')) {
-      downloadBlob(videoUrl, filename);
+    if (playableUrl.startsWith('blob:') || videoUrl.startsWith('blob:')) {
+      downloadBlob(playableUrl || videoUrl, filename);
       return;
     }
     await downloadRemoteVideo(videoUrl, filename);
@@ -48,18 +84,22 @@ export function VideoPreviewModal({
           {subtitle && <DialogDescription>{subtitle}</DialogDescription>}
         </DialogHeader>
         <div className="bg-muted mx-auto w-full overflow-hidden rounded-lg">
-          <StreamableVideo
-            key={videoUrl}
-            src={videoUrl}
-            className="mx-auto aspect-[9/16] max-h-[70vh] w-full object-contain"
-          />
+          {loadError ? (
+            <p className="text-muted-foreground px-3 py-8 text-center text-sm">{loadError}</p>
+          ) : playableUrl ? (
+            <StreamableVideo
+              key={playableUrl}
+              src={playableUrl}
+              className="mx-auto aspect-[9/16] max-h-[70vh] w-full object-contain"
+            />
+          ) : null}
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <Button type="button" variant="default" size="sm" onClick={() => void handleDownload()}>
             <Download className="size-4" />
             {isHls ? 'Open playlist' : 'Download MP4'}
           </Button>
-          {!videoUrl.startsWith('blob:') && (
+          {!needsAuth && !videoUrl.startsWith('blob:') && (
             <Button asChild variant="outline" size="sm">
               <a href={videoUrl} target="_blank" rel="noreferrer">
                 <ExternalLink className="size-4" />

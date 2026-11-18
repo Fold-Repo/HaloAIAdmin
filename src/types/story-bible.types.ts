@@ -15,13 +15,7 @@ export type StoryBibleSection =
 
 export type CharacterRole = 'protagonist' | 'antagonist' | 'supporting' | 'minor';
 
-export type RelationshipType =
-  | 'ally'
-  | 'rival'
-  | 'family'
-  | 'romantic'
-  | 'mentor'
-  | 'enemy';
+export type RelationshipType = 'ally' | 'rival' | 'family' | 'romantic' | 'mentor' | 'enemy';
 
 export type StoryOverview = {
   projectId: string;
@@ -237,9 +231,48 @@ export type ExtractEpisodesResult = {
   episodes: import('./episode-planner.types').Episode[];
 };
 
+export type EnrichCharacterLooksResult = {
+  updated: Array<{ id: string; name: string; filled: string[] }>;
+  pending: number;
+  message: string;
+};
+
 export type GenerateStoryVisualResult = {
   imageUrl: string;
   imagePromptHash: string;
   imageGeneratedAt: string;
   reused: boolean;
+};
+
+export type StoryNarrationChapterSummary = {
+  id: string;
+  title: string;
+  episodeNumber: number | null;
+  charCount: number;
+  audioUrl: string | null;
+};
+
+export type StoryNarrationStatus = {
+  status: 'missing' | 'ready' | 'stale';
+  audioUrl: string | null;
+  scriptHash: string;
+  generatedAt: string | null;
+  voice: string;
+  provider: string;
+  characterCount: number;
+  chapterCount: number;
+  chapters: StoryNarrationChapterSummary[];
+  reused: boolean;
+};
+
+export type StoryNarrationScriptChapter = {
+  id: string;
+  title: string;
+  episodeNumber: number | null;
+  text: string;
+};
+
+export type StoryNarrationScript = {
+  chapters: StoryNarrationScriptChapter[];
+  fullText: string;
 };

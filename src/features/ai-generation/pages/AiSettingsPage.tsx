@@ -9,10 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { LoadingScreen, QueryError } from '@/components/common';
 import { ROUTES } from '@/constants';
-import {
-  useAiSettings,
-  useUpdateAiSettings,
-} from '@/features/ai-generation/hooks/useAiSettings';
+import { useAiSettings, useUpdateAiSettings } from '@/features/ai-generation/hooks/useAiSettings';
 import type { AiTaskCategory, AiModelCatalogItem } from '@/types';
 
 const TASK_LABELS: Record<AiTaskCategory, string> = {

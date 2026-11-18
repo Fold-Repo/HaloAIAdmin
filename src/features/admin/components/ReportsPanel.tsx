@@ -23,7 +23,10 @@ export function ReportsPanel({ reports }: { reports: AdminReport[] }) {
       <CardContent>
         <div className="space-y-3">
           {reports.map((report) => (
-            <div key={report.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+            <div
+              key={report.id}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3"
+            >
               <div>
                 <p className="font-medium">{report.title}</p>
                 <p className="text-muted-foreground text-xs">

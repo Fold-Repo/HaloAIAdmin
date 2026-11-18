@@ -1,9 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  WORKER_STATUS_LABELS,
-} from '@/features/rendering/utils/rendering.utils';
+import { WORKER_STATUS_LABELS } from '@/features/rendering/utils/rendering.utils';
 import { formatRelativeDate } from '@/features/creator/utils/creator.utils';
 import type { RenderWorker } from '@/types';
 

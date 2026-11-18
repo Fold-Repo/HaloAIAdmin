@@ -15,8 +15,7 @@ export function useUpdateAiSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpdateAiSettingsPayload) =>
-      aiSettingsService.updateSettings(payload),
+    mutationFn: (payload: UpdateAiSettingsPayload) => aiSettingsService.updateSettings(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.aiSettings.detail() });
     },

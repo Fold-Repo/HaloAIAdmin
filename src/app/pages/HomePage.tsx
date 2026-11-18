@@ -1,13 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ROUTES } from '@/constants';
 import { DEMO_LOGIN, SEED_PROJECT_REF } from '@/features/tutorial/content/tutorial-content';
 import { useAuthStore } from '@/store';
@@ -20,8 +14,7 @@ export function HomePage() {
       <div className="max-w-2xl space-y-4">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">AI Creator Studio</h1>
         <p className="text-muted-foreground text-lg">
-          Build, manage, and publish AI-generated vertical episodes — from story bible to
-          analytics.
+          Build, manage, and publish AI-generated vertical episodes — from story bible to analytics.
         </p>
       </div>
 

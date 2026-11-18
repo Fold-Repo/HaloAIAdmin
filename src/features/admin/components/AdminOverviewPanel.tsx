@@ -1,10 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  formatNumber,
-  formatUsd,
-  HEALTH_LABELS,
-} from '@/features/admin/utils/admin.utils';
+import { formatNumber, formatUsd, HEALTH_LABELS } from '@/features/admin/utils/admin.utils';
 import type { AdminOverview } from '@/types';
 
 function healthVariant(health: AdminOverview['systemHealth']) {

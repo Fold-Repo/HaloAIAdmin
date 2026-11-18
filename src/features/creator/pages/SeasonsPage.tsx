@@ -10,10 +10,7 @@ import { LoadingScreen } from '@/components/common';
 import { SeasonList } from '@/features/creator/components/SeriesManagement';
 import { useCreateSeason } from '@/features/creator/hooks/useCreatorMutations';
 import { useSeasons, useSeries } from '@/features/creator/hooks/useCreatorQueries';
-import {
-  seasonSchema,
-  type SeasonFormValues,
-} from '@/features/creator/schemas/creator.schemas';
+import { seasonSchema, type SeasonFormValues } from '@/features/creator/schemas/creator.schemas';
 import { ROUTES } from '@/constants';
 
 export function SeasonsPage() {
@@ -47,7 +44,8 @@ export function SeasonsPage() {
 
   const onSubmit = form.handleSubmit((values) => {
     createSeason.mutate(values, {
-      onSuccess: () => form.reset({ title: `Season ${values.number + 1}`, number: values.number + 1 }),
+      onSuccess: () =>
+        form.reset({ title: `Season ${values.number + 1}`, number: values.number + 1 }),
     });
   });
 

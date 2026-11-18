@@ -48,7 +48,11 @@ export function CliffhangerGenerator({
         <form className="flex flex-col gap-3 sm:flex-row" onSubmit={onSubmit}>
           <div className="flex-1 space-y-2">
             <Label htmlFor="tone">Tone</Label>
-            <Input id="tone" placeholder="suspenseful, emotional, shocking..." {...form.register('tone')} />
+            <Input
+              id="tone"
+              placeholder="suspenseful, emotional, shocking..."
+              {...form.register('tone')}
+            />
           </div>
           <div className="flex items-end">
             <Button type="submit" disabled={mutation.isPending}>

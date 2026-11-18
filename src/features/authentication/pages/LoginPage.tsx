@@ -13,10 +13,7 @@ import { DemoLoginPanel } from '@/features/authentication/components/DemoLoginPa
 import { PasswordInput } from '@/features/authentication/components/PasswordInput';
 import { SocialLoginButtons } from '@/features/authentication/components/SocialLoginButtons';
 import { useLogin } from '@/features/authentication/hooks/useLogin';
-import {
-  loginSchema,
-  type LoginFormValues,
-} from '@/features/authentication/schemas/auth.schemas';
+import { loginSchema, type LoginFormValues } from '@/features/authentication/schemas/auth.schemas';
 
 export function LoginPage() {
   const { login, isPending, error } = useLogin();
@@ -42,19 +39,18 @@ export function LoginPage() {
       description="Enter your credentials to access the studio."
       footer={
         <div className="w-full space-y-4">
-          <Button
-            type="submit"
-            form="login-form"
-            className="w-full"
-            disabled={isPending}
-          >
+          <Button type="submit" form="login-form" className="w-full" disabled={isPending}>
             {isPending ? 'Signing in...' : 'Sign in'}
           </Button>
           <AuthLink prompt="Don't have an account?" linkText="Create one" to={ROUTES.REGISTER} />
         </div>
       }
     >
-      <form id="login-form" className="space-y-4" onSubmit={handleSubmit((values) => login(values))}>
+      <form
+        id="login-form"
+        className="space-y-4"
+        onSubmit={handleSubmit((values) => login(values))}
+      >
         <AuthFormField id="email" label="Email" error={errors.email?.message}>
           <Input
             id="email"

@@ -16,10 +16,7 @@ export function hasRole(userRole: UserRole, allowedRoles: UserRole[]): boolean {
   return allowedRoles.includes(userRole);
 }
 
-export function getPostAuthRedirect(
-  onboardingCompleted: boolean,
-  role: UserRole,
-): string {
+export function getPostAuthRedirect(onboardingCompleted: boolean, role: UserRole): string {
   if (!onboardingCompleted) {
     return ROUTES.ONBOARDING;
   }
