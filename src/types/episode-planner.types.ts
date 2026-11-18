@@ -45,6 +45,7 @@ export type Scene = {
   videoUrl?: string;
   videos?: SceneVideo[];
   dialogueSnippet?: string;
+  cinematicPlan?: Record<string, unknown> | null;
 };
 
 export type EpisodePlannerSummary = {
